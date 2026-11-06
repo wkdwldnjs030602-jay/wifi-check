@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>와이파이 노출 진단</title>
-<meta name="description" content="지금 연결된 네트워크에서 내 기록이 어디까지 보이는지 점검합니다. 모든 검사는 이 브라우저에서만 실행됩니다.">
+<meta name="description" content="지금 연결된 네트워크와 내 폰 기록을 바탕으로, 회사가 무엇을 볼 수 있는지 점검합니다. 모든 처리는 이 브라우저에서만 실행됩니다.">
 <style>
 :root{
   --bg:#f6f7f9; --card:#ffffff; --ink:#15181d; --muted:#5d6570; --line:#e3e6ea;
   --accent:#2f5bea; --accent-ink:#ffffff;
   --ok:#1f8a4c; --ok-bg:#e7f5ec; --warn:#b86e00; --warn-bg:#fdf3e1;
   --bad:#c62f2f; --bad-bg:#fbe9e9; --info:#4b5563; --info-bg:#eef0f3;
+  --console:#0f172a; --console-ink:#dbe3ee; --console-muted:#8796ab; --console-line:#1f2a3d;
   --radius:14px;
 }
 @media (prefers-color-scheme: dark){
@@ -19,6 +20,7 @@
     --accent:#6f8dff; --accent-ink:#0f1115;
     --ok:#4cc27e; --ok-bg:#15291e; --warn:#f0a83a; --warn-bg:#2d2312;
     --bad:#ff6b6b; --bad-bg:#331818; --info:#b4bcc6; --info-bg:#22262d;
+    --console:#0a0f1a; --console-line:#1b2436;
   }
 }
 :root[data-theme="dark"]{
@@ -26,25 +28,32 @@
   --accent:#6f8dff; --accent-ink:#0f1115;
   --ok:#4cc27e; --ok-bg:#15291e; --warn:#f0a83a; --warn-bg:#2d2312;
   --bad:#ff6b6b; --bad-bg:#331818; --info:#b4bcc6; --info-bg:#22262d;
+  --console:#0a0f1a; --console-line:#1b2436;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;-webkit-text-size-adjust:100%}
-.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 48px}
 header h1{font-size:22px;margin:4px 0 4px;letter-spacing:-.02em}
 header p{margin:0;color:var(--muted);font-size:14px}
 .tag{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.06em}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 0 6px;margin-top:6px}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 4px;font-size:13.5px;font-weight:600;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pane{display:none}.pane.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:14px}
 .card h2{font-size:16px;margin:0 0 10px;letter-spacing:-.01em}
+.card h3{font-size:14.5px;margin:16px 0 8px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .seg label{border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;display:block}
 .seg input{margin-right:6px;accent-color:var(--accent)}
 .seg small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .seg label:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 button{font:inherit}
-.btn{width:100%;margin-top:12px;padding:13px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px;cursor:pointer}
+.btn{width:100%;margin-top:12px;padding:13px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px;cursor:pointer;display:block;text-align:center}
 .btn:disabled{opacity:.55;cursor:default}
 .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);font-weight:600;font-size:14px;padding:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
 .level{display:flex;align-items:center;gap:14px}
 .level .num{font-size:40px;font-weight:800;line-height:1;min-width:64px;text-align:center}
@@ -63,9 +72,9 @@ ul.items li:first-child{border-top:0}
 .pill.bad{color:var(--bad);background:var(--bad-bg)} .pill.info{color:var(--info);background:var(--info-bg)}
 .items b{display:block;font-size:14.5px}
 .items span.s{display:block;color:var(--muted);font-size:13px}
-details{border-top:1px solid var(--line);padding:10px 0}
-details:first-of-type{border-top:0}
-summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center;list-style:none;font-weight:600;font-size:14.5px}
+details.d{border-top:1px solid var(--line);padding:10px 0}
+details.d:first-of-type{border-top:0}
+details.d>summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center;list-style:none;font-weight:600;font-size:14.5px}
 summary::-webkit-details-marker{display:none}
 .kv{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border-radius:8px;padding:10px;margin-top:8px;overflow-wrap:anywhere;color:var(--muted)}
 .explain{font-size:13px;color:var(--muted);margin-top:6px}
@@ -77,65 +86,247 @@ summary::-webkit-details-marker{display:none}
 .opts label{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer}
 .opts input{position:absolute;opacity:0;pointer-events:none}
 .opts label:has(input:checked){background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+details.guide{background:var(--bg);border-radius:10px;padding:10px 12px;margin:0 0 10px}
+details.guide summary{font-size:13px;color:var(--accent);font-weight:600;cursor:pointer;list-style:none}
+details.guide summary::before{content:"▸";display:inline-block;margin-right:6px;transition:transform .15s}
+details.guide[open] summary::before{transform:rotate(90deg)}
+.guide .why{font-size:12.5px;color:var(--muted);margin:8px 0 6px}
+.guide ol.steps{margin:0;padding-left:20px;font-size:13.5px}
+.guide ol.steps li{margin:4px 0}
+.guide .judge{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
+.guide .judge div{display:flex;gap:8px;margin:5px 0}
+.guide .jk{flex:none;min-width:44px;font-weight:700;font-size:12px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:1px 6px;height:fit-content;background:var(--card)}
+.guide .tip{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.guide .tip::before{content:"TIP ";font-weight:700;color:var(--accent)}
 ol.rec{margin:0;padding-left:20px}
 ol.rec li{margin:6px 0;font-size:14px}
-.hidden{display:none}
+.hidden{display:none!important}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .8s linear infinite;vertical-align:-2px}
 @keyframes r{to{transform:rotate(360deg)}}
 footer{margin-top:20px;font-size:12px;color:var(--muted)}
 footer p{margin:6px 0}
+/* report tab */
+.set{display:grid;gap:10px}
+.set .lbl{font-size:13px;font-weight:600;margin-bottom:4px}
+.days{display:flex;gap:4px;flex-wrap:wrap}
+.days label{border:1px solid var(--line);border-radius:8px;width:38px;text-align:center;padding:6px 0;font-size:13.5px;cursor:pointer}
+.days input{position:absolute;opacity:0;pointer-events:none}
+.days label:has(input:checked){background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+input[type=time],input[type=text]{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+.stat .v{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat.alert .v{color:var(--warn)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+table.t td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl{list-style:none;margin:0;padding:0;font-size:13px;max-height:300px;overflow:auto}
+.tl li{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)}
+.tl .tm{font-variant-numeric:tabular-nums;min-width:118px;color:var(--muted)}
+.heat{display:grid;gap:2px;font-size:10px;color:var(--muted);margin-top:6px}
+.heat .c{aspect-ratio:1;border-radius:3px;background:var(--line);cursor:pointer;position:relative}
+.heat .c.w{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent)}
+.heat .rl{white-space:nowrap;padding-right:4px;align-self:center;font-size:10.5px}
+.heat .hl{text-align:center}
+.legend{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.cap{font-size:12.5px;color:var(--ink);background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:8px;min-height:34px}
+.hb{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.hb .tr{height:12px;background:var(--bg);border-radius:4px;overflow:hidden}
+.hb .tr i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.hb .tr i.s{background:var(--warn)}
+.hb .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.dom{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+/* admin console */
+.console{background:var(--console);color:var(--console-ink);border-radius:12px;padding:12px;margin-top:14px;font-size:12.5px}
+.console .hd{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--console-line);padding-bottom:8px;margin-bottom:8px}
+.console .hd b{font-size:13px}
+.console .hd span{font-size:11px;color:var(--console-muted)}
+.console .dev{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;margin-bottom:10px}
+.console .dev dt{color:var(--console-muted)} .console .dev dd{margin:0;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.chips button{border:1px solid var(--console-line);background:transparent;color:var(--console-ink);border-radius:999px;padding:3px 10px;font-size:11.5px;cursor:pointer}
+.chips button.on{background:var(--console-ink);color:var(--console)}
+.log{max-height:420px;overflow:auto}
+.lg{display:grid;grid-template-columns:44px 1fr auto;gap:2px 8px;padding:7px 0;border-top:1px solid var(--console-line)}
+.lg .tm{color:var(--console-muted);font-variant-numeric:tabular-nums}
+.lg .ds{font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+.lg .meta{grid-column:2 / 4;color:var(--console-muted);font-size:11.5px}
+.lg .act{font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;height:fit-content}
+.lg .act.a{background:#14361f;color:#6fdc98} .lg .act.b{background:#3a1717;color:#ff8f8f}
+.lg .day{grid-column:1 / 4;color:var(--console-muted);font-size:11px;padding-top:4px}
+.lock{color:var(--console-muted)} .open{color:#ffb4b4;font-weight:700}
+.infer li{font-size:14px;margin:6px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <span class="tag">PRIVACY GUARD · 시안 v0.1</span>
+    <span class="tag">PRIVACY GUARD · 시안 v0.2</span>
     <h1>와이파이 노출 진단</h1>
-    <p>지금 연결된 네트워크에서 내 기록이 어디까지 보이는지 점검해요. 검사는 이 브라우저에서만 실행되고, 결과는 이 기기에만 저장돼요.</p>
+    <p>지금 네트워크와 내 폰 기록을 바탕으로 회사가 무엇을 볼 수 있는지 점검해요. 모든 처리는 이 브라우저 안에서만 이뤄지고, 어떤 기록도 밖으로 보내지 않아요.</p>
   </header>
 
-  <section class="card">
-    <h2>1. 지금 어떤 네트워크인가요?</h2>
-    <div class="seg">
-      <label><input type="radio" name="mode" value="wifi" checked>회사 와이파이<small>진단할 네트워크</small></label>
-      <label><input type="radio" name="mode" value="cell">셀룰러 (LTE·5G)<small>비교 기준값 측정</small></label>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="net" aria-selected="true">네트워크 진단</button>
+    <button role="tab" data-tab="rep" aria-selected="false">기록 분석</button>
+    <button role="tab" data-tab="adm" aria-selected="false">관리자 화면</button>
+  </nav>
+
+  <!-- ================= TAB 1 ================= -->
+  <div class="pane on" id="pane-net">
+    <section class="card">
+      <h2>1. 지금 어떤 네트워크인가요?</h2>
+      <div class="seg">
+        <label><input type="radio" name="mode" value="wifi" checked>회사 와이파이<small>진단할 네트워크</small></label>
+        <label><input type="radio" name="mode" value="cell">셀룰러 (LTE·5G)<small>비교 기준값 측정</small></label>
+      </div>
+      <button class="btn" id="run">검사 시작</button>
+      <p class="note" id="baseInfo"></p>
+    </section>
+
+    <section class="card hidden" id="resultCard">
+      <h2>진단 결과</h2>
+      <div class="level">
+        <div class="num" id="lvNum">–</div>
+        <div><div class="t" id="lvTitle"></div><div class="d" id="lvDesc"></div></div>
+      </div>
+      <div class="bar" id="lvBar"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i></div>
+      <div class="bar-l"><span>1 양호</span><span>2 기본</span><span>3 주의</span><span>4 위험</span></div>
+      <ul class="items" id="summary"></ul>
+    </section>
+
+    <section class="card hidden" id="recCard">
+      <h2>권장 조치</h2>
+      <ol class="rec" id="recs"></ol>
+    </section>
+
+    <section class="card">
+      <h2>2. 직접 확인할 항목</h2>
+      <p class="note" style="margin:0 0 10px">iOS는 웹페이지가 아래 정보를 읽지 못하게 막아 두었어요. 설정 앱에서 확인한 뒤 골라 주세요. 답을 바꾸면 결과에 바로 반영돼요.</p>
+      <div id="manual"></div>
+    </section>
+
+    <section class="card hidden" id="detailCard">
+      <h2>자동 검사 상세</h2>
+      <div id="details"></div>
+      <button class="btn ghost" id="copy">결과 요약 복사</button>
+    </section>
+  </div>
+
+  <!-- ================= TAB 2 ================= -->
+  <div class="pane" id="pane-rep">
+    <section class="card">
+      <h2>앱 개인정보 보호 리포트 분석</h2>
+      <p class="note" style="margin:0">아이폰이 직접 기록한 '어떤 앱이 언제 위치에 접근했고, 어떤 사이트와 통신했는지'를 분석해요. 파일은 이 화면 안에서만 읽고, 어디에도 올리지 않아요.</p>
+      <details class="guide" style="margin-top:12px" id="exportGuide" open>
+        <summary>리포트 파일 받는 방법</summary>
+        <ol class="steps">
+          <li><b>설정</b> → <b>개인정보 보호 및 보안</b>을 눌러요.</li>
+          <li>맨 아래까지 내려 <b>앱 개인정보 보호 리포트</b>를 눌러요.</li>
+          <li>꺼져 있다면 <b>앱 개인정보 보호 리포트 켜기</b>를 눌러요. 켠 시점부터 기록이 쌓여요. <b>평일 2~3일 이상</b> 지나고 받으면 분석이 정확해요.</li>
+          <li>같은 화면 맨 아래 <b>앱 활동 저장</b> → <b>"파일"에 저장</b>을 눌러요. (<span class="dom">App_Privacy_Report_….ndjson</span> 파일이 생겨요)</li>
+          <li>이 화면에서 <b>리포트 파일 선택</b>을 눌러 방금 저장한 파일을 골라요.</li>
+        </ol>
+        <p class="tip">리포트는 최근 7일치만 보관돼요. 매주 한 번씩 저장해 두면 기간을 비교할 수 있어요.</p>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>내 근무 시간</h2>
+      <div class="set">
+        <div><div class="lbl">근무 요일</div><div class="days" id="days"></div></div>
+        <div class="row2">
+          <div><div class="lbl">출근</div><input type="time" id="wStart" value="09:00"></div>
+          <div><div class="lbl">퇴근</div><input type="time" id="wEnd" value="18:00"></div>
+        </div>
+        <div><div class="lbl">출퇴근 여유 시간</div><select id="wBuf" style="font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%"><option value="0">없음</option><option value="15">앞뒤 15분</option><option value="30">앞뒤 30분</option><option value="60">앞뒤 60분</option></select><p class="note">출근 체크(예: 08:52)·퇴근 체크(예: 18:05)처럼 근무시간 경계 근처 기록은 '출퇴근 시간대'로 따로 분류해요. 회사에 머무는 시간 계산에도 써요.</p></div>
+        <div><div class="lbl">업무용 앱 찾을 단어</div><input type="text" id="workKw" value="mailplug" placeholder="예: mailplug, flex, slack"><p class="note">앱 ID에 이 단어가 들어 있으면 업무용 앱으로 보고 따로 분석해요. 쉼표로 여러 개 입력할 수 있어요.</p></div>
+      </div>
+      <div class="row2">
+        <label class="btn file">리포트 파일 선택<input type="file" id="file" accept=".ndjson,.json,.txt,application/json,application/x-ndjson,text/plain"></label>
+        <button class="btn ghost" id="sample" style="margin-top:12px">샘플로 미리보기</button>
+      </div>
+      <p class="note" id="fileInfo"></p>
+    </section>
+
+    <div id="repOut" class="hidden">
+      <section class="card">
+        <h2>한눈에 보기</h2>
+        <div class="stats" id="stats"></div>
+        <p class="note" id="periodNote"></p>
+      </section>
+
+      <section class="card">
+        <h2>위치 접근 분석</h2>
+        <div id="locWork"></div>
+        <h3>시간대별 위치 접근</h3>
+        <div class="seg" style="grid-template-columns:1fr 1fr" id="heatSel">
+          <label><input type="radio" name="hsel" value="work" checked>업무용 앱만</label>
+          <label><input type="radio" name="hsel" value="all">모든 앱</label>
+        </div>
+        <div class="heat" id="heat"></div>
+        <div class="legend" id="heatLegend"></div>
+        <div class="cap" id="heatCap">칸을 누르면 그 시간에 위치에 접근한 앱이 보여요.</div>
+        <h3>앱별 위치 접근</h3>
+        <table class="t" id="locTable"></table>
+      </section>
+
+      <section class="card">
+        <h2>업무시간 통신 — 회사 와이파이에 남았을 기록</h2>
+        <p class="note" style="margin:0 0 8px">리포트에는 와이파이·셀룰러 구분이 없어요. 그래서 <b>근무 시간 = 회사 와이파이 사용</b>으로 가정하고 계산했어요.</p>
+        <div id="catBars"></div>
+        <h3>회사가 보면 곤란할 수 있는 접속</h3>
+        <div id="sensList"></div>
+      </section>
+
+      <section class="card">
+        <h2>업무용 앱이 통신한 곳</h2>
+        <div id="workNet"></div>
+      </section>
+
+      <section class="card">
+        <h2>다른 민감 권한 접근</h2>
+        <div id="otherAcc"></div>
+      </section>
+
+      <section class="card">
+        <h2>광고·추적 서버에 가장 많이 보낸 앱</h2>
+        <div id="trackers"></div>
+      </section>
     </div>
-    <button class="btn" id="run">검사 시작</button>
-    <p class="note" id="baseInfo"></p>
-  </section>
+  </div>
 
-  <section class="card hidden" id="resultCard">
-    <h2>진단 결과</h2>
-    <div class="level">
-      <div class="num" id="lvNum">–</div>
-      <div><div class="t" id="lvTitle"></div><div class="d" id="lvDesc"></div></div>
+  <!-- ================= TAB 3 ================= -->
+  <div class="pane" id="pane-adm">
+    <section class="card">
+      <h2>회사 관리자 화면 미리보기</h2>
+      <p class="note" style="margin:0">회사 방화벽·공유기 관리 화면에 내 기록이 어떤 모습으로 남는지 재구성한 <b>예시 화면</b>이에요. 특정 업체 제품 화면이 아니에요. 네트워크 진단 결과와 기록 분석 데이터를 함께 반영해요.</p>
+      <p class="note" id="admSrc"></p>
+    </section>
+
+    <section class="card">
+      <h2>관리자가 이 화면으로 알 수 있는 것</h2>
+      <ul class="infer" id="infer"></ul>
+    </section>
+
+    <div class="console">
+      <div class="hd"><b>트래픽 로그 · 예시</b><span id="admRange"></span></div>
+      <dl class="dev" id="admDev"></dl>
+      <div class="chips" id="admChips"></div>
+      <div class="log" id="admLog"></div>
     </div>
-    <div class="bar" id="lvBar"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i></div>
-    <div class="bar-l"><span>1 양호</span><span>2 기본</span><span>3 주의</span><span>4 위험</span></div>
-    <ul class="items" id="summary"></ul>
-  </section>
-
-  <section class="card hidden" id="recCard">
-    <h2>권장 조치</h2>
-    <ol class="rec" id="recs"></ol>
-  </section>
-
-  <section class="card">
-    <h2>2. 직접 확인할 항목</h2>
-    <p class="note" style="margin:0 0 10px">iOS는 웹페이지가 아래 정보를 읽지 못하게 막아 두었어요. 설정 앱에서 확인한 뒤 골라 주세요. 답을 바꾸면 결과에 바로 반영돼요.</p>
-    <div id="manual"></div>
-  </section>
-
-  <section class="card hidden" id="detailCard">
-    <h2>자동 검사 상세</h2>
-    <div id="details"></div>
-    <button class="btn ghost" id="copy">결과 요약 복사</button>
-  </section>
+    <p class="note">'내용' 칸이 암호화로 표시되면 관리자는 접속한 사이트 이름까지만 볼 수 있어요. 메시지나 검색어 같은 내용은 볼 수 없어요.</p>
+  </div>
 
   <footer>
     <p>이 진단은 회사가 기록을 <b>볼 수 있는 구조인지</b>를 판단해요. 회사 서버에 실제로 무엇이 저장되는지는 알 수 없어요.</p>
-    <p>검사에 쓰는 외부 서비스: Cloudflare(연결 정보), tls.peet.ws(TLS 지문), httpbin.org(요청 헤더), ipwho.is(통신사 정보). 이 서비스들은 일반 웹 요청처럼 접속 IP를 볼 수 있어요.</p>
-    <p>판정은 휴리스틱이라 오탐이 있을 수 있어요. 셀룰러 기준값을 먼저 측정해 두면 정확도가 올라가요.</p>
+    <p>네트워크 검사에 쓰는 외부 서비스: Cloudflare(연결 정보), tls.peet.ws(TLS 지문), httpbin.org(요청 헤더), ipwho.is(통신사 정보), Google·Cloudflare STUN(WebRTC). 이 서비스들은 일반 웹 요청처럼 접속 IP를 볼 수 있어요. 리포트 파일은 외부로 보내지 않아요.</p>
+    <p>판정은 휴리스틱이라 오탐이 있을 수 있어요.</p>
   </footer>
 </div>
 
@@ -143,16 +334,28 @@ footer p{margin:6px 0}
 (function(){
 "use strict";
 
-/* ---------- storage (best-effort) ---------- */
+/* ================= common ================= */
 const store = {
   get(k){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-const BASE_KEY = "pg.baseline.v1", MAN_KEY = "pg.manual.v1";
-
-/* ---------- helpers ---------- */
+const BASE_KEY = "pg.baseline.v2", MAN_KEY = "pg.manual.v1", SET_KEY = "pg.settings.v1";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DOW = ["일","월","화","수","목","금","토"];
+const pad = n => String(n).padStart(2,"0");
+const fmtT = d => pad(d.getHours()) + ":" + pad(d.getMinutes());
+const fmtD = d => (d.getMonth()+1) + "/" + d.getDate() + "(" + DOW[d.getDay()] + ")";
+const fmtDT = d => fmtD(d) + " " + fmtT(d);
+const dayKey = d => d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+
+/* tabs */
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + b.dataset.tab));
+  if(b.dataset.tab === "adm") renderAdmin();
+  window.scrollTo({top:0});
+}));
 
 async function fetchT(url, ms, asText){
   const ctl = new AbortController();
@@ -163,7 +366,6 @@ async function fetchT(url, ms, asText){
     return asText ? await r.text() : await r.json();
   } finally { clearTimeout(t); }
 }
-
 function probeImg(url, ms){
   return new Promise(res => {
     const img = new Image(); let done = false;
@@ -176,18 +378,23 @@ function probeImg(url, ms){
   });
 }
 
-/* ---------- automatic tests ---------- */
-const SUSPECT_HEADERS = ["via","x-forwarded-for","forwarded","x-forwarded-host","x-forwarded-proto","x-bluecoat-via","x-proxy-id","client-ip","x-client-ip","x-real-ip","x-iwsaas-via","x-zscaler-client","x-authenticated-user","x-forcepoint","x-sophos","x-fortinet"];
+/* ================= TAB 1: network tests ================= */
+const SUSPECT_HEADERS = ["via","x-forwarded-for","forwarded","x-forwarded-host","x-forwarded-proto","x-bluecoat-via","x-proxy-id","client-ip","x-client-ip","x-real-ip","x-iwsaas-via","x-zscaler-client","x-authenticated-user","x-forcepoint","x-sophos","x-fortinet","x-netskope","x-cisco-umbrella"];
 const RELAY_ORGS = /(cloudflare|akamai|fastly|apple)/i;
+const VENDORS = [
+  [/zscaler/i,"Zscaler"],[/netskope/i,"Netskope"],[/palo ?alto|prisma/i,"Palo Alto Networks"],[/forcepoint|websense/i,"Forcepoint"],
+  [/opendns|umbrella|cisco/i,"Cisco Umbrella"],[/iboss/i,"iboss"],[/menlo/i,"Menlo Security"],[/cato ?networks/i,"Cato Networks"],
+  [/fortinet|fortigate/i,"Fortinet"],[/sophos/i,"Sophos"],[/check ?point/i,"Check Point"],[/bluecoat|symantec|broadcom/i,"Symantec/Blue Coat"]
+];
 const PROBES = [
-  ["유튜브","https://www.youtube.com/favicon.ico"],
-  ["인스타그램","https://www.instagram.com/favicon.ico"],
-  ["페이스북","https://www.facebook.com/favicon.ico"],
-  ["넷플릭스","https://www.netflix.com/favicon.ico"],
-  ["트위치","https://www.twitch.tv/favicon.ico"],
-  ["스팀","https://store.steampowered.com/favicon.ico"],
-  ["네이버","https://www.naver.com/favicon.ico"],
-  ["쿠팡","https://www.coupang.com/favicon.ico"]
+  ["유튜브","https://www.youtube.com/favicon.ico","video"],
+  ["인스타그램","https://www.instagram.com/favicon.ico","sns"],
+  ["페이스북","https://www.facebook.com/favicon.ico","sns"],
+  ["넷플릭스","https://www.netflix.com/favicon.ico","video"],
+  ["트위치","https://www.twitch.tv/favicon.ico","video"],
+  ["스팀","https://store.steampowered.com/favicon.ico","game"],
+  ["네이버","https://www.naver.com/favicon.ico","portal"],
+  ["쿠팡","https://www.coupang.com/favicon.ico","shop"]
 ];
 
 async function testNet(){
@@ -205,15 +412,15 @@ async function testNet(){
     }catch(e2){ return {ok:false, err:String(e2.message || e2)}; }
   }
 }
-
 async function testTrace(){
+  const t0 = performance.now();
   try{
     const txt = await fetchT("https://www.cloudflare.com/cdn-cgi/trace", 8000, true);
+    const ms = Math.round(performance.now() - t0);
     const o = {}; txt.split("\n").forEach(l => { const i = l.indexOf("="); if(i > 0) o[l.slice(0,i)] = l.slice(i+1).trim(); });
-    return {ok:true, ...o};
+    return {ok:true, ms, ...o};
   }catch(e){ return {ok:false, err:String(e.message || e)}; }
 }
-
 async function testTls(){
   try{
     const j = await fetchT("https://tls.peet.ws/api/all", 10000);
@@ -221,7 +428,6 @@ async function testTls(){
     return {ok:true, ua:j.user_agent || "", http:j.http_version || "", ja3:tls.ja3_hash || "", ja4:tls.ja4 || "", peet:tls.peetprint_hash || ""};
   }catch(e){ return {ok:false, err:String(e.message || e)}; }
 }
-
 async function testHeaders(){
   try{
     const j = await fetchT("https://httpbin.org/headers", 8000);
@@ -230,26 +436,70 @@ async function testHeaders(){
     return {ok:true, headers:h, suspect:found, ua:h["User-Agent"] || h["user-agent"] || ""};
   }catch(e){ return {ok:false, err:String(e.message || e)}; }
 }
-
 async function testProbes(){
   const r = await Promise.all(PROBES.map(async ([n,u]) => [n, await probeImg(u, 6000)]));
   return {ok:true, results:Object.fromEntries(r)};
 }
+function testWebRTC(){
+  return new Promise(res => {
+    if(!window.RTCPeerConnection) return res({ok:false, err:"이 브라우저는 WebRTC를 지원하지 않아요"});
+    let pc, done = false;
+    const ips = new Set();
+    const fin = () => { if(done) return; done = true; try{ pc.close(); }catch(e){} res({ok:true, srflx:[...ips]}); };
+    try{
+      pc = new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun.cloudflare.com:3478"}]});
+      pc.createDataChannel("pg");
+      pc.onicecandidate = e => {
+        if(!e.candidate){ fin(); return; }
+        const c = e.candidate.candidate || "";
+        if(/ typ srflx/.test(c)){ const p = c.split(" "); if(p[4]) ips.add(p[4]); }
+      };
+      pc.createOffer().then(o => pc.setLocalDescription(o)).catch(err => { if(!done){ done = true; res({ok:false, err:String(err)}); } });
+      setTimeout(fin, 5000);
+    }catch(err){ res({ok:false, err:String(err.message || err)}); }
+  });
+}
 
 /* ---------- manual checklist ---------- */
 const MANUAL = [
-  {id:"profile", q:"회사 프로필이 설치되어 있나요?",
-   how:"설정 → 일반 → VPN 및 기기 관리",
+  {id:"profile", q:"회사 프로필이 설치되어 있나요?", how:"설정 → 일반 → VPN 및 기기 관리",
+   why:"회사가 폰 설정을 원격으로 관리하거나, 와이파이·인증서를 설치할 때 쓰는 통로예요.",
+   steps:["홈 화면에서 회색 톱니바퀴 <b>설정</b> 앱을 열어요.","<b>일반</b>을 눌러요.","화면을 아래로 내려 <b>VPN 및 기기 관리</b>를 찾아요. 이 메뉴가 아예 없으면 '없음'이에요.","메뉴를 눌러 <b>구성 프로필</b> 또는 <b>모바일 기기 관리</b> 칸이 있는지 봐요."],
+   judge:[["있음","구성 프로필·모바일 기기 관리 칸에 회사 이름, 'Wi-Fi', '보안', 'MDM' 같은 항목이 보임"],["없음","메뉴가 없거나, 들어가도 'VPN: 연결 안 됨'만 있고 프로필 칸이 없음"]],
    opts:[["yes","있음"],["no","없음"],["unk","모름"]]},
-  {id:"rootca", q:"켜져 있는 루트 인증서가 있나요?",
-   how:"설정 → 일반 → 정보 → 맨 아래 '인증서 신뢰 설정'. 목록이 비어 있으면 '없음'",
+  {id:"rootca", q:"켜져 있는 루트 인증서가 있나요?", how:"설정 → 일반 → 정보 → 맨 아래 '인증서 신뢰 설정'",
+   why:"이게 켜져 있으면 회사 장비가 암호화된 내용(메시지, 검색어)을 풀어 볼 수 있어요. 가장 중요한 항목이에요.",
+   steps:["<b>설정</b> → <b>일반</b> → 맨 위쪽의 <b>정보</b>를 눌러요.","화면을 <b>맨 아래까지</b> 내려요. 법적 고지 아래에 <b>인증서 신뢰 설정</b>이 있어요.","눌러서 <b>'루트 인증서에 대한 전체 신뢰 활성화'</b> 칸이 있는지 봐요."],
+   judge:[["있음","그 칸에 인증서 이름이 있고 오른쪽 스위치가 <b>초록색(켬)</b>"],["없음","'신뢰 저장소 버전'만 보이고 그 칸이 없음, 또는 스위치가 모두 꺼져 있음"]],
+   tip:"앞에서 회사 프로필이 '없음'이었다면 여기도 대부분 '없음'이에요. 인증서는 보통 프로필로 함께 설치되거든요.",
    opts:[["yes","있음"],["no","없음"],["unk","모름"]]},
-  {id:"mac", q:"이 와이파이의 '비공개 Wi-Fi 주소' 설정은?",
-   how:"설정 → Wi-Fi → 회사 와이파이 옆 ⓘ",
+  {id:"proxy", q:"이 와이파이에 HTTP 프록시가 설정되어 있나요?", how:"설정 → Wi-Fi → 회사 와이파이 ⓘ → 맨 아래 'HTTP 프록시'",
+   why:"프록시가 설정되어 있으면 웹 접속이 전부 회사 중계 서버를 거쳐요. 접속한 사이트 목록이 사람 단위로 깔끔하게 남는 구조예요.",
+   steps:["회사 와이파이에 연결된 상태로 <b>설정</b> → <b>Wi-Fi</b>를 눌러요.","연결된 <b>회사 와이파이 이름</b> 오른쪽 파란 <b>ⓘ</b>를 눌러요.","화면 <b>맨 아래</b> <b>HTTP 프록시</b> 칸의 <b>프록시 구성</b> 오른쪽 글자를 봐요."],
+   judge:[["끔","'끔'으로 적혀 있음"],["수동","'수동'으로 적혀 있음 (서버 주소가 직접 입력됨)"],["자동","'자동'으로 적혀 있음 (회사가 설정 파일로 지정)"]],
+   opts:[["off","끔"],["manual","수동"],["auto","자동"],["unk","모름"]]},
+  {id:"mac", q:"이 와이파이의 '비공개 Wi-Fi 주소' 설정은?", how:"설정 → Wi-Fi → 회사 와이파이 이름 오른쪽 ⓘ",
+   why:"이 주소로 회사가 '이 기기 = 같은 사람'을 매일 연결해서 추적할 수 있어요.",
+   steps:["회사 와이파이에 연결된 상태로 <b>설정</b> → <b>Wi-Fi</b>를 눌러요.","맨 위 체크 표시가 붙은 <b>회사 와이파이 이름</b> 오른쪽의 파란 <b>ⓘ</b>를 눌러요.","중간쯤 <b>비공개 Wi-Fi 주소</b> 줄을 확인해요. 오른쪽에 '고정'·'순환'·'끔'이 적혀 있어요."],
+   judge:[["끔","'끔'이라고 적혀 있거나 스위치가 꺼져 있음 (실제 기기 주소가 그대로 노출)"],["고정","'고정'이거나, 예전 iOS처럼 스위치만 있고 켜져 있음"],["순환","'순환'이라고 적혀 있음"]],
+   tip:"iOS 17 이하는 선택지 없이 스위치만 있어요. 켜져 있으면 '고정'을 고르세요.",
    opts:[["off","끔"],["fixed","고정"],["rotating","순환"],["unk","모름"]]},
-  {id:"name", q:"기기 이름에 실명이 들어 있나요?",
-   how:"설정 → 일반 → 정보 → 이름 (예: 'Jay의 iPhone')",
-   opts:[["yes","예"],["no","아니요"]]}
+  {id:"name", q:"기기 이름에 실명이 들어 있나요?", how:"설정 → 일반 → 정보 → 맨 위 '이름'",
+   why:"이 이름은 와이파이에 붙을 때 회사 공유기 관리 화면에 그대로 떠요.",
+   steps:["<b>설정</b> → <b>일반</b> → <b>정보</b>를 눌러요.","맨 위 첫 줄 <b>이름</b> 오른쪽 글자를 봐요."],
+   judge:[["예","'홍길동의 iPhone', 'Jay's iPhone'처럼 이름·별명·이니셜로 나를 알 수 있음"],["아니요","'iPhone'처럼 누구 것인지 알 수 없음"]],
+   tip:"바꾸려면 그 줄을 눌러 새 이름을 입력하면 돼요. 폰 기능에는 아무 영향이 없어요.",
+   opts:[["yes","예"],["no","아니요"]]},
+  {id:"login", q:"와이파이에 연결할 때 사번·아이디로 로그인했나요?", how:"처음 연결할 때를 떠올려 보세요",
+   why:"계정으로 로그인하는 와이파이는 기록이 '기기'가 아니라 '내 계정'에 바로 붙어요. 기기 이름을 바꾸거나 주소를 순환시켜도 누구인지 드러나요.",
+   steps:["처음 회사 와이파이에 연결할 때 <b>사용자 이름·암호</b> 입력 창이 떴는지 떠올려 봐요.","또는 <b>인증서 '신뢰'</b> 버튼을 눌렀거나, 연결 직후 <b>로그인 웹페이지</b>(사번 입력)가 떴는지 떠올려 봐요.","기억이 안 나면 설정 → Wi-Fi → ⓘ 화면에 <b>사용자 이름</b>이나 <b>인증서</b> 줄이 있는지 봐요."],
+   judge:[["예","위 셋 중 하나라도 해당됨"],["아니요","와이파이 비밀번호만 입력하고 바로 연결됨"]],
+   opts:[["yes","예"],["no","아니요"],["unk","모름"]]},
+  {id:"warn", q:"와이파이 정보 화면에 경고 문구가 있나요?", how:"설정 → Wi-Fi → 회사 와이파이 ⓘ → 이름 바로 아래",
+   why:"iOS가 이 네트워크의 문제를 발견하면 주황색 경고를 띄워요.",
+   steps:["<b>설정</b> → <b>Wi-Fi</b> → 회사 와이파이 오른쪽 <b>ⓘ</b>를 눌러요.","맨 위 와이파이 이름 <b>바로 아래</b>에 주황색이나 회색 안내 문구가 있는지 봐요."],
+   judge:[["릴레이 차단","'개인정보 보호 경고' 또는 '이 네트워크에서 iCloud 비공개 릴레이가 꺼져 있음'"],["보안 취약","'보안 취약 네트워크' 또는 'WEP/WPA'처럼 오래된 보안 방식이라는 안내"],["없음","아무 문구도 없음"]],
+   opts:[["relay","릴레이 차단"],["weak","보안 취약"],["none","없음"]]}
 ];
 let manual = store.get(MAN_KEY) || {};
 
@@ -258,6 +508,13 @@ function renderManual(){
     <div class="q">
       <div class="qt">${esc(m.q)}</div>
       <div class="how">${esc(m.how)}</div>
+      <details class="guide"${manual[m.id] ? "" : " open"}>
+        <summary>확인 방법 자세히 보기</summary>
+        <p class="why">${esc(m.why)}</p>
+        <ol class="steps">${m.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+        <div class="judge">${m.judge.map(([k,v]) => `<div><span class="jk">${esc(k)}</span><span>${v}</span></div>`).join("")}</div>
+        ${m.tip ? `<p class="tip">${esc(m.tip)}</p>` : ""}
+      </details>
       <div class="opts">${m.opts.map(([v,l]) => `
         <label><input type="radio" name="m_${m.id}" value="${v}" ${manual[m.id]===v?"checked":""}>${esc(l)}</label>`).join("")}
       </div>
@@ -265,123 +522,158 @@ function renderManual(){
   $("#manual").querySelectorAll("input").forEach(inp => inp.addEventListener("change", e => {
     manual[e.target.name.slice(2)] = e.target.value;
     store.set(MAN_KEY, manual);
-    if(lastAuto) render();
+    if(lastAuto) renderNet();
   }));
 }
 
 /* ---------- analysis ---------- */
-let lastAuto = null, lastMode = "wifi";
+let lastAuto = null, lastMode = "wifi", lastNetResult = null;
+const isV4 = ip => /^\d+\.\d+\.\d+\.\d+$/.test(ip || "");
 
-function analyze(a, mode){
+function analyzeNet(a, mode){
   const base = store.get(BASE_KEY);
-  const f = []; // findings: {key, sev, title, sub}
-  const sig = {mitmStrong:false, mitmWeak:false, domainHidden:false, filtering:false};
+  const f = [];
+  const sig = {mitmStrong:false, mitmWeak:false, domainHidden:false, relay:false, filtering:false, vendor:"", proxyPath:false, blockedCats:[]};
+  const myUA = navigator.userAgent;
 
-  // 1. 내용 가로채기
+  // vendor detection
+  const orgText = a.net.ok ? (a.net.org + " " + a.net.isp) : "";
+  const hdrText = a.headers.ok ? Object.keys(a.headers.headers).join(" ") : "";
+  for(const [re,name] of VENDORS){ if(re.test(orgText) || re.test(hdrText)){ sig.vendor = name; break; } }
+  if(!sig.vendor && a.trace.ok && a.trace.gateway === "on") sig.vendor = "Cloudflare Gateway";
+
+  // WebRTC vs HTTP IP
+  let rtcNote = null;
+  if(a.rtc.ok && a.net.ok){
+    const v4 = a.rtc.srflx.filter(isV4);
+    if(!a.rtc.srflx.length){ rtcNote = {sev:"info", t:"UDP 통신 차단됨", s:"영상통화·게임에 쓰는 UDP 통신이 막혀 있어요. 방화벽 정책이 엄격한 네트워크예요."}; }
+    else if(isV4(a.net.ip) && v4.length && !v4.includes(a.net.ip)){
+      sig.proxyPath = true;
+      rtcNote = {sev:"warn", t:"웹 접속이 별도 경로로 나감", s:"웹 요청 IP(" + a.net.ip + ")와 직접 통신 IP(" + v4[0] + ")가 달라요. 웹 접속만 프록시·보안 게이트웨이를 거치고 있다는 신호예요."};
+    }
+  }
+
+  // 1. content interception
   const mitmReasons = [];
   if(a.headers.ok && a.headers.suspect.length){ sig.mitmStrong = true; mitmReasons.push("프록시 헤더 발견: " + a.headers.suspect.join(", ")); }
-  const myUA = navigator.userAgent;
-  if(a.tls.ok && a.tls.ua && a.tls.ua !== myUA){ sig.mitmStrong = true; mitmReasons.push("서버가 받은 브라우저 정보가 실제와 다름"); }
-  if(a.headers.ok && a.headers.ua && a.headers.ua !== myUA){ sig.mitmStrong = true; if(!mitmReasons.some(r=>r.includes("브라우저 정보"))) mitmReasons.push("서버가 받은 브라우저 정보가 실제와 다름"); }
-  if(mode === "wifi" && base && base.ua === myUA && a.tls.ok && base.ja4 && a.tls.ja4 && base.ja4 !== a.tls.ja4){
-    sig.mitmStrong = true; mitmReasons.push("TLS 지문이 셀룰러 기준값과 다름");
-  }
-  if(a.tls.ok && /^HTTP\/1/i.test(a.tls.http) && !(base && /^HTTP\/1/i.test(base.http || ""))){ sig.mitmWeak = true; mitmReasons.push("HTTP/2 대신 HTTP/1.1로 연결됨 (프록시 경유 가능성)"); }
+  if((a.tls.ok && a.tls.ua && a.tls.ua !== myUA) || (a.headers.ok && a.headers.ua && a.headers.ua !== myUA)){ sig.mitmStrong = true; mitmReasons.push("서버가 받은 브라우저 정보가 실제와 다름"); }
+  if(mode === "wifi" && base && base.ua === myUA && a.tls.ok && base.ja4 && a.tls.ja4 && base.ja4 !== a.tls.ja4){ sig.mitmStrong = true; mitmReasons.push("TLS 지문이 셀룰러 기준값과 다름"); }
+  if(a.tls.ok && /^HTTP\/1/i.test(a.tls.http) && !(base && /^HTTP\/1/i.test(base.http || ""))){ sig.mitmWeak = true; mitmReasons.push("HTTP/2 대신 HTTP/1.1로 연결됨"); }
+  if(manual.profile === "yes" && manual.rootca !== "yes"){ sig.mitmWeak = true; mitmReasons.push("회사 프로필 설치됨 (루트 인증서가 없으면 내용 열람은 어려움)"); }
+  if(manual.proxy === "manual" || manual.proxy === "auto"){ sig.mitmWeak = true; sig.proxyPath = true; mitmReasons.push("HTTP 프록시 설정됨 (" + (manual.proxy === "auto" ? "자동" : "수동") + ")"); }
+  if(sig.vendor){ sig.mitmWeak = true; mitmReasons.push("보안 게이트웨이 경유: " + sig.vendor); }
+  if(sig.proxyPath && !mitmReasons.some(r => r.includes("프록시"))) { sig.mitmWeak = true; mitmReasons.push("웹 접속이 별도 경로(프록시)로 나감"); }
 
   const manualMitm = manual.rootca === "yes";
-  if(manual.profile === "yes" && !manualMitm){ sig.mitmWeak = true; mitmReasons.push("회사 프로필 설치됨 (루트 인증서가 없으면 내용 열람은 어려움)"); }
   const manualUnknown = !manual.profile || manual.profile === "unk" || !manual.rootca || manual.rootca === "unk";
   const autoDone = a.tls.ok || a.headers.ok;
 
   if(sig.mitmStrong || manualMitm){
-    const why = mitmReasons.filter(x => !x.startsWith("회사 프로필")); if(manual.profile==="yes") why.push("회사 프로필 설치됨"); if(manual.rootca==="yes") why.push("신뢰된 루트 인증서 있음");
+    const why = mitmReasons.filter(x => !x.startsWith("회사 프로필")); if(manual.profile==="yes") why.push("회사 프로필 설치됨"); if(manualMitm) why.push("신뢰된 루트 인증서 있음");
     f.push({key:"content", sev:"bad", title:"메시지·검색어 내용: 열람 가능한 구조", sub:why.join(" · ")});
   } else if(sig.mitmWeak){
-    f.push({key:"content", sev:"warn", title:"메시지·검색어 내용: 가로채기 의심", sub:mitmReasons.join(" · ") + ". 셀룰러 기준값과 비교해 보세요."});
+    f.push({key:"content", sev:"warn", title:"메시지·검색어 내용: 가로채기 의심", sub:mitmReasons.join(" · ") + ". 루트 인증서가 없으면 실제 내용은 볼 수 없어요."});
   } else if(!autoDone){
     f.push({key:"content", sev:"info", title:"메시지·검색어 내용: 자동 검사 실패", sub:"검사 서버에 연결하지 못했어요. 회사가 해당 사이트를 막았을 수도 있어요."});
   } else {
-    f.push({key:"content", sev: manualUnknown ? "info" : "ok", title:"메시지·검색어 내용: 보호됨", sub: manualUnknown ? "자동 검사에선 가로채기 흔적이 없어요. 아래 프로필·인증서까지 확인하면 확정돼요." : "가로채기 흔적이 없고 프로필·인증서도 없어요."});
+    f.push({key:"content", sev: manualUnknown ? "info" : "ok", title:"메시지·검색어 내용: 보호됨", sub: manualUnknown ? "자동 검사에선 가로채기 흔적이 없어요. 프로필·인증서까지 확인하면 확정돼요." : "가로채기 흔적이 없고 프로필·인증서도 없어요."});
   }
 
-  // 2. 도메인 노출
-  const org = (a.net.ok ? a.net.org + " " + a.net.isp : "");
+  // 2. domain exposure
   const isSafari = /Safari/i.test(myUA) && !/CriOS|FxiOS|EdgiOS|Chrome/i.test(myUA);
-  const relay = a.net.ok && RELAY_ORGS.test(org) && isSafari;
+  sig.relay = a.net.ok && RELAY_ORGS.test(orgText) && isSafari && !sig.vendor && manual.warn !== "relay";
   const warp = a.trace.ok && /^(on|plus)$/.test(a.trace.warp || "");
   const ech = a.trace.ok && a.trace.sni === "encrypted";
-  if(relay || warp){
+  if((sig.relay || warp) && !sig.proxyPath){
     sig.domainHidden = true;
-    f.push({key:"domain", sev:"ok", title:"방문 사이트 이름: 가려짐", sub: relay ? "iCloud 비공개 릴레이로 보이는 경로로 나가고 있어요 (" + esc(a.net.org) + ")" : "Cloudflare WARP가 켜져 있어요."});
+    f.push({key:"domain", sev:"ok", title:"방문 사이트 이름: Safari는 가려짐", sub:(sig.relay ? "iCloud 비공개 릴레이로 보이는 경로로 나가고 있어요 (" + a.net.org + ")" : "Cloudflare WARP가 켜져 있어요.") + " 단, 다른 앱의 통신은 여전히 보일 수 있어요."});
+  } else if(sig.proxyPath){
+    f.push({key:"domain", sev:"warn", title:"방문 사이트 이름: 사람 단위로 기록되는 구조", sub:"웹 접속이 회사 중계 서버를 거쳐서 '누가 언제 어느 사이트에 갔는지'가 정리된 목록으로 남기 쉬워요."});
   } else if(ech){
-    f.push({key:"domain", sev:"warn", title:"방문 사이트 이름: 일부만 가려짐", sub:"일부 사이트는 이름을 암호화(ECH)하지만 대부분은 여전히 보여요. DNS 조회로도 노출될 수 있어요."});
+    f.push({key:"domain", sev:"warn", title:"방문 사이트 이름: 일부만 가려짐", sub:"일부 사이트는 이름을 암호화(ECH)하지만 대부분은 여전히 보여요."});
   } else {
-    f.push({key:"domain", sev:"warn", title:"방문 사이트 이름: 회사에 노출됨", sub:"naver.com, youtube.com처럼 접속한 사이트 이름과 시각이 남을 수 있어요."});
+    f.push({key:"domain", sev:"warn", title:"방문 사이트 이름: 회사에 노출됨", sub:"naver.com, youtube.com처럼 접속한 사이트 이름과 시각이 남을 수 있어요." + (manual.warn === "relay" ? " 이 네트워크는 비공개 릴레이를 막고 있어요." : "")});
   }
 
-  // 3. 기기 식별
+  // 3. device identity
   const devBits = [];
+  if(manual.login === "yes") devBits.push("계정 로그인 와이파이라 기록이 내 계정에 바로 붙음");
   if(manual.name === "yes") devBits.push("기기 이름에 실명");
   if(manual.mac === "off") devBits.push("실제 MAC 주소 사용 중");
   else if(manual.mac === "fixed") devBits.push("비공개 주소가 고정이라 같은 기기로 계속 식별 가능");
-  if(devBits.length){
+  if(manual.login === "yes"){
+    f.push({key:"device", sev:"bad", title:"내 기기: 계정으로 직접 식별", sub:devBits.join(" · ")});
+  } else if(devBits.length){
     f.push({key:"device", sev:"warn", title:"내 기기: 식별 가능", sub:devBits.join(" · ")});
-  } else if(manual.name === "no" && manual.mac === "rotating"){
+  } else if(manual.name === "no" && manual.mac === "rotating" && manual.login === "no"){
     f.push({key:"device", sev:"ok", title:"내 기기: 익명화됨", sub:"이름에 실명이 없고 주소가 주기적으로 바뀌어요. 단, 접속 중인 시간은 기록돼요."});
   } else {
-    f.push({key:"device", sev:"info", title:"내 기기: 확인 필요", sub:"아래 직접 확인 항목에서 기기 이름과 비공개 주소 설정을 골라 주세요."});
+    f.push({key:"device", sev:"info", title:"내 기기: 확인 필요", sub:"직접 확인할 항목에서 기기 이름·비공개 주소·로그인 방식을 골라 주세요."});
   }
 
-  // 4. 필터링
+  // 4. security gateway / path
+  if(sig.vendor){
+    f.push({key:"vendor", sev:"warn", title:"보안 게이트웨이: " + sig.vendor, sub:"기업용 보안 서비스를 거쳐 인터넷에 나가요. 이런 서비스는 보통 접속 기록 저장과 사이트 분류 기능이 있어요. 루트 인증서가 없으면 내용까지는 못 봐요."});
+  }
+  if(rtcNote) f.push({key:"rtc", sev:rtcNote.sev, title:rtcNote.t, sub:rtcNote.s});
+
+  // 5. wifi security
+  if(manual.warn === "weak") f.push({key:"wifi", sev:"warn", title:"와이파이 암호화: 취약", sub:"오래된 보안 방식이라 같은 와이파이를 쓰는 다른 사람도 일부 통신을 엿볼 수 있어요."});
+
+  // 6. filtering
   const blocked = Object.entries(a.probes.results).filter(([,v]) => !v).map(([k]) => k);
+  const catOf = Object.fromEntries(PROBES.map(p => [p[0], p[2]]));
+  let effBlocked = blocked;
   if(mode === "wifi" && base && base.probes){
-    const newly = blocked.filter(k => base.probes[k] === true);
-    if(newly.length){ sig.filtering = true; f.push({key:"filter", sev:"warn", title:"접속 차단: 회사 정책 적용 중", sub:"셀룰러에선 열리고 여기선 막힘: " + newly.join(", ")}); }
+    effBlocked = blocked.filter(k => base.probes[k] === true);
+    if(effBlocked.length){ sig.filtering = true; f.push({key:"filter", sev:"warn", title:"접속 차단: 회사 정책 적용 중", sub:"셀룰러에선 열리고 여기선 막힘: " + effBlocked.join(", ")}); }
     else f.push({key:"filter", sev:"ok", title:"접속 차단: 발견 안 됨", sub:"셀룰러 기준값과 차이가 없어요."});
   } else if(blocked.length >= 2){
     sig.filtering = true;
     f.push({key:"filter", sev:"warn", title:"접속 차단: 의심", sub:"응답 없음: " + blocked.join(", ") + " (기준값 없이 판단해 오탐 가능)"});
   } else {
+    effBlocked = [];
     f.push({key:"filter", sev:"ok", title:"접속 차단: 발견 안 됨", sub: blocked.length ? "응답 없음: " + blocked.join(", ") + " (일시적 오류일 수 있음)" : "검사한 사이트가 모두 열렸어요."});
   }
+  if(sig.filtering) sig.blockedCats = [...new Set(effBlocked.map(k => catOf[k]))];
 
-  // 5. 접속 기록 (항상)
+  // 7. latency
+  if(mode === "wifi" && base && base.ms && a.trace.ok && a.trace.ms > base.ms * 2 && a.trace.ms - base.ms > 150){
+    f.push({key:"lat", sev:"info", title:"응답 지연: 셀룰러보다 느림", sub:"셀룰러 " + base.ms + "ms → 와이파이 " + a.trace.ms + "ms. 중간에 검사 장비를 거치면 느려지기도 해요 (참고용)."});
+  }
+
   f.push({key:"log", sev:"info", title:"접속 시각·사용량: 항상 기록됨", sub:"와이파이에 붙어 있던 시간, 데이터 양, 연결된 공유기(대략적인 사내 위치)는 설정과 무관하게 남아요."});
 
   // level
-  let lv;
   const contentBad = f.find(x => x.key==="content").sev === "bad";
-  const devExposed = f.find(x => x.key==="device").sev === "warn";
+  const devSev = f.find(x => x.key==="device").sev;
+  const devExposed = devSev === "warn" || devSev === "bad";
+  let lv;
   if(contentBad) lv = 4;
   else if(!sig.domainHidden && (devExposed || sig.mitmWeak)) lv = 3;
   else if(!sig.domainHidden) lv = 2;
   else lv = devExposed ? 2 : 1;
-
-  const LV = {
-    1:["양호","사이트 이름까지 가려져요. 접속 시간 정도만 남아요."],
-    2:["기본","내용은 보호되지만 방문한 사이트 이름은 보여요."],
-    3:["주의","방문 사이트와 함께 '누구의 기기인지'까지 연결돼요."],
-    4:["위험","회사가 암호화된 내용까지 열어 볼 수 있는 구조예요."]
-  };
+  const LV = {1:["양호","사이트 이름까지 가려져요. 접속 시간 정도만 남아요."],2:["기본","내용은 보호되지만 방문한 사이트 이름은 보여요."],3:["주의","방문 사이트와 함께 '누구인지'까지 연결되는 구조예요."],4:["위험","회사가 암호화된 내용까지 열어 볼 수 있는 구조예요."]};
   const provisional = lv < 4 && manualUnknown;
 
-  // recommendations
   const recs = [];
   if(contentBad) recs.push("이 와이파이에서는 개인 메신저·금융·검색을 쓰지 말고 셀룰러로 전환하세요. 회사 프로필이 개인 폰에 설치된 이유를 담당자에게 확인할 수 있어요.");
+  if(manual.proxy === "manual" || manual.proxy === "auto") recs.push("HTTP 프록시는 회사가 정한 설정이라 임의로 끄면 업무 접속이 안 될 수 있어요. 개인 용도는 셀룰러로 분리하는 게 안전해요.");
+  if(manual.login === "yes") recs.push("계정 로그인 와이파이는 기기 설정으로 익명화할 수 없어요. 개인 용무는 셀룰러로 하세요.");
   if(manual.name === "yes") recs.push("설정 → 일반 → 정보 → 이름에서 실명이 없는 이름(예: iPhone)으로 바꾸세요.");
   if(manual.mac === "off" || manual.mac === "fixed") recs.push("설정 → Wi-Fi → ⓘ → 비공개 Wi-Fi 주소를 '순환'으로 바꾸세요. 회사가 MAC 주소로 접속을 승인하는 곳이라면 연결이 끊길 수 있어요.");
-  if(!sig.domainHidden && !contentBad) recs.push("개인 용도로 쓸 땐 와이파이를 잠시 끄고 셀룰러를 쓰는 게 가장 확실해요.");
-  if(!sig.domainHidden) recs.push("iCloud+ 사용자라면 설정 → Apple 계정 → iCloud → 비공개 릴레이를 켜 보세요. 회사가 막아 두면 와이파이 설정에 '이 네트워크에서 꺼짐'이 표시돼요.");
+  if(!sig.domainHidden && !contentBad && manual.login !== "yes") recs.push("개인 용도로 쓸 땐 와이파이를 잠시 끄고 셀룰러를 쓰는 게 가장 확실해요.");
+  if(!sig.domainHidden && manual.warn !== "relay" && !sig.proxyPath) recs.push("iCloud+ 사용자라면 설정 → Apple 계정 → iCloud → 비공개 릴레이를 켜 보세요.");
   if(manualUnknown) recs.push("직접 확인할 항목의 프로필·인증서를 확인하면 판정이 확정돼요.");
   if(!base && mode === "wifi") recs.push("셀룰러로 바꿔서 '기준값 측정'을 한 번 해 두면 가로채기·차단 판정이 더 정확해져요.");
+  recs.push("'기록 분석' 탭에서 앱 개인정보 보호 리포트를 올리면 실제로 어떤 접속이 남았을지 볼 수 있어요.");
 
-  return {lv, LV, provisional, f, recs};
+  return {lv, LV, provisional, f, recs, sig};
 }
 
-/* ---------- rendering ---------- */
-function render(){
+function renderNet(){
   const a = lastAuto, mode = lastMode;
-  const r = analyze(a, mode);
+  const r = analyzeNet(a, mode); lastNetResult = r;
   const [t, d] = r.LV[r.lv];
   $("#lvNum").innerHTML = r.lv + "<small>/4</small>";
   $("#lvNum").style.color = ["","var(--ok)","var(--accent)","var(--warn)","var(--bad)"][r.lv];
@@ -392,24 +684,27 @@ function render(){
   $("#summary").innerHTML = r.f.map(x => `<li><span class="pill ${x.sev}">${PL[x.sev]}</span><div><b>${esc(x.title)}</b><span class="s">${esc(x.sub)}</span></div></li>`).join("");
   $("#recs").innerHTML = r.recs.map(x => `<li>${esc(x)}</li>`).join("");
   $("#resultCard").classList.remove("hidden");
-  $("#recCard").classList.toggle("hidden", !r.recs.length);
+  $("#recCard").classList.remove("hidden");
 
   const kv = o => `<div class="kv">${Object.entries(o).map(([k,v]) => esc(k) + ": " + esc(typeof v === "object" ? JSON.stringify(v) : v)).join("<br>")}</div>`;
   const st = ok => ok ? '<span class="pill ok">완료</span>' : '<span class="pill info">실패</span>';
   $("#details").innerHTML = `
-    <details><summary>네트워크 정보 ${st(a.net.ok)}</summary>
-      <div class="explain">지금 인터넷으로 나가는 공인 IP와 회선 정보예요. 회사 회선 이름이 보이면 회사 와이파이를 거치고 있다는 뜻이에요.</div>
-      ${a.net.ok ? kv({IP:a.net.ip, 회선:a.net.org, ISP:a.net.isp, ASN:a.net.asn, 위치:a.net.city + " " + a.net.country}) : kv({오류:a.net.err})}</details>
-    <details><summary>연결 암호화 (Cloudflare) ${st(a.trace.ok)}</summary>
-      <div class="explain">sni=plaintext면 방문 사이트 이름이 네트워크에 그대로 보여요. warp=on이면 Cloudflare VPN이 켜진 상태예요.</div>
-      ${a.trace.ok ? kv({sni:a.trace.sni, tls:a.trace.tls, http:a.trace.http, warp:a.trace.warp, gateway:a.trace.gateway, colo:a.trace.colo}) : kv({오류:a.trace.err})}</details>
-    <details><summary>TLS 지문 ${st(a.tls.ok)}</summary>
+    <details class="d"><summary>네트워크 정보 ${st(a.net.ok)}</summary>
+      <div class="explain">지금 인터넷으로 나가는 공인 IP와 회선 정보예요. 보안 업체 이름(Zscaler 등)이 보이면 회사 보안 게이트웨이를 거치고 있다는 뜻이에요.</div>
+      ${a.net.ok ? kv({IP:a.net.ip, 회선:a.net.org, ISP:a.net.isp, ASN:a.net.asn, 위치:a.net.city + " " + a.net.country, "보안 업체":r.sig.vendor || "감지 안 됨"}) : kv({오류:a.net.err})}</details>
+    <details class="d"><summary>WebRTC 경로 비교 ${st(a.rtc.ok)}</summary>
+      <div class="explain">웹 요청과 별개로 UDP로 직접 나가는 IP를 확인해요. 두 IP가 다르면 웹 접속만 별도 중계 서버를 거친다는 뜻이에요.</div>
+      ${a.rtc.ok ? kv({"웹 요청 IP":a.net.ok ? a.net.ip : "-", "직접 통신 IP":a.rtc.srflx.length ? a.rtc.srflx.join(", ") : "없음 (UDP 차단)"}) : kv({오류:a.rtc.err})}</details>
+    <details class="d"><summary>연결 암호화 (Cloudflare) ${st(a.trace.ok)}</summary>
+      <div class="explain">sni=plaintext면 방문 사이트 이름이 네트워크에 그대로 보여요. gateway=on이면 Cloudflare 기업 보안을 거치는 중이에요.</div>
+      ${a.trace.ok ? kv({sni:a.trace.sni, tls:a.trace.tls, http:a.trace.http, warp:a.trace.warp, gateway:a.trace.gateway, colo:a.trace.colo, "응답 시간":a.trace.ms + "ms"}) : kv({오류:a.trace.err})}</details>
+    <details class="d"><summary>TLS 지문 ${st(a.tls.ok)}</summary>
       <div class="explain">회사 장비가 중간에서 암호화를 풀었다가 다시 걸면 서버가 받는 지문이 바뀌어요. 셀룰러 기준값과 다르면 가로채기 신호예요.</div>
       ${a.tls.ok ? kv({JA4:a.tls.ja4, JA3_hash:a.tls.ja3, HTTP:a.tls.http, "UA 일치": a.tls.ua === navigator.userAgent ? "예" : "아니요"}) : kv({오류:a.tls.err})}</details>
-    <details><summary>요청 헤더 ${st(a.headers.ok)}</summary>
+    <details class="d"><summary>요청 헤더 ${st(a.headers.ok)}</summary>
       <div class="explain">프록시 장비는 Via, X-Forwarded-For 같은 흔적을 남기곤 해요. HTTPS 요청에서 이런 헤더가 보이면 내용을 열어 봤다는 뜻이에요.</div>
       ${a.headers.ok ? kv({"의심 헤더": a.headers.suspect.length ? a.headers.suspect.join(", ") : "없음", 전체: Object.keys(a.headers.headers).join(", ")}) : kv({오류:a.headers.err})}</details>
-    <details><summary>사이트 접속 시험 <span class="pill ok">완료</span></summary>
+    <details class="d"><summary>사이트 접속 시험 <span class="pill ok">완료</span></summary>
       <div class="explain">자주 차단되는 사이트의 아이콘을 불러와 봤어요. 셀룰러에선 열리는데 여기서만 막히면 회사가 접속 기록을 보고 차단 정책을 적용하는 거예요.</div>
       ${kv(Object.fromEntries(Object.entries(a.probes.results).map(([k,v]) => [k, v ? "열림" : "응답 없음"])))}</details>`;
   $("#detailCard").classList.remove("hidden");
@@ -428,13 +723,13 @@ $("#run").addEventListener("click", async () => {
   const btn = $("#run");
   lastMode = document.querySelector('input[name="mode"]:checked').value;
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 검사 중…';
-  const [net, trace, tls, headers, probes] = await Promise.all([testNet(), testTrace(), testTls(), testHeaders(), testProbes()]);
-  lastAuto = {net, trace, tls, headers, probes};
+  const [net, trace, tls, headers, probes, rtc] = await Promise.all([testNet(), testTrace(), testTls(), testHeaders(), testProbes(), testWebRTC()]);
+  lastAuto = {net, trace, tls, headers, probes, rtc};
   if(lastMode === "cell"){
-    store.set(BASE_KEY, {at:Date.now(), ua:navigator.userAgent, ja4:tls.ok ? tls.ja4 : "", http:tls.ok ? tls.http : "", probes:probes.results});
+    store.set(BASE_KEY, {at:Date.now(), ua:navigator.userAgent, ja4:tls.ok ? tls.ja4 : "", http:tls.ok ? tls.http : "", ms:trace.ok ? trace.ms : 0, probes:probes.results});
     renderBaseInfo();
   }
-  render();
+  renderNet();
   btn.disabled = false; btn.textContent = lastMode === "cell" ? "기준값 다시 측정" : "다시 검사";
   $("#resultCard").scrollIntoView({behavior:"smooth", block:"start"});
 });
@@ -442,8 +737,407 @@ document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener(
   $("#run").textContent = e.target.value === "cell" ? "기준값 측정" : "검사 시작";
 }));
 
+/* ================= TAB 2: privacy report ================= */
+const CATS = [
+  {k:"job", label:"구직·이직", sens:3, d:["saramin.co.kr","jobkorea.co.kr","wanted.co.kr","wanted.jobs","linkedin.com","licdn.com","jobplanet.co.kr","incruit.com","catch.co.kr","rememberapp.co.kr","remember.co.kr","peoplenjob.com","albamon.com","alba.co.kr","jumpit.co.kr","programmers.co.kr","rocketpunch.com"]},
+  {k:"work-com", label:"직장인 커뮤니티", sens:3, d:["teamblind.com","blind.com"]},
+  {k:"health", label:"건강·의료", sens:3, d:["goodoc.co.kr","ddocdoc.com","hidoc.co.kr","amc.seoul.kr","snuh.org","severance.healthcare","nhis.or.kr","hira.or.kr","kormedi.com"]},
+  {k:"date", label:"데이팅", sens:3, d:["tinder.com","gotinder.com","bumble.com","hinge.co","glam.am","wippy.co.kr","noondate.com"]},
+  {k:"fin", label:"금융·투자", sens:2, d:["toss.im","tossinvest.com","tossbank.com","kakaobank.com","kakaopay.com","kbstar.com","kbsec.com","shinhan.com","shinhansec.com","wooribank.com","hanabank.com","kebhana.com","ibk.co.kr","nonghyup.com","kiwoom.com","samsungpop.com","miraeasset.com","nhqv.com","upbit.com","bithumb.com","coinone.co.kr","kbanknow.com","banksalad.com"]},
+  {k:"video", label:"동영상·스트리밍", sens:1, d:["youtube.com","googlevideo.com","ytimg.com","youtu.be","netflix.com","nflxvideo.net","nflxso.net","twitch.tv","ttvnw.net","jtvnw.net","chzzk.naver.com","sooplive.co.kr","afreecatv.com","tving.com","wavve.com","coupangplay.com","disneyplus.com","watcha.com","laftel.net","spotify.com","scdn.co","melon.com","genie.co.kr"]},
+  {k:"game", label:"게임", sens:1, d:["steampowered.com","steamcommunity.com","steamstatic.com","riotgames.com","leagueoflegends.com","nexon.com","ncsoft.com","netmarble.com","krafton.com","pubg.com","supercell.com","epicgames.com","playstation.com","xboxlive.com","hoyoverse.com","mihoyo.com","roblox.com"]},
+  {k:"shop", label:"쇼핑·배달", sens:1, d:["coupang.com","coupangcdn.com","11st.co.kr","gmarket.co.kr","auction.co.kr","ssg.com","musinsa.com","kream.co.kr","29cm.co.kr","ably.co.kr","zigzag.kr","aliexpress.com","temu.com","shopping.naver.com","smartstore.naver.com","baemin.com","woowahan.com","yogiyo.co.kr","coupangeats.com","daangn.com","bunjang.co.kr","joongna.com"]},
+  {k:"sns", label:"SNS", sens:1, d:["instagram.com","cdninstagram.com","facebook.com","fbcdn.net","threads.net","twitter.com","x.com","twimg.com","tiktok.com","tiktokcdn.com","tiktokv.com","byteoversea.com","band.us","pinterest.com","reddit.com","everytime.kr","dcinside.com","fmkorea.com","theqoo.net","ruliweb.com","clien.net"]},
+  {k:"msg", label:"메신저", sens:0, d:["kakao.com","kakaocdn.net","kakao.co.kr","daumcdn.net","line.me","line-apps.com","telegram.org","t.me","whatsapp.net","whatsapp.com","discord.com","discord.gg","discordapp.com","discordapp.net","signal.org","messenger.com"]},
+  {k:"portal", label:"포털·검색·뉴스", sens:0, d:["naver.com","naver.net","pstatic.net","daum.net","nate.com","google.com","google.co.kr","gstatic.com","googleapis.com","bing.com","chosun.com","joongang.co.kr","donga.com","hani.co.kr","yna.co.kr","news1.kr"]},
+  {k:"work", label:"업무", sens:-1, d:["mailplug.com","mailplug.co.kr","office.com","office365.com","microsoft.com","microsoftonline.com","sharepoint.com","outlook.com","slack.com","slack-edge.com","notion.so","notion.com","zoom.us","dropbox.com","flex.team","jandi.com","atlassian.net","figma.com","docs.google.com","drive.google.com","hiworks.com","dooray.com","worksmobile.com"]},
+  {k:"track", label:"광고·추적", sens:-1, d:["doubleclick.net","google-analytics.com","googletagmanager.com","googlesyndication.com","googleadservices.com","app-measurement.com","appsflyer.com","appsflyersdk.com","adjust.com","adjust.net.in","branch.io","app.link","amplitude.com","braze.com","braze.eu","airbridge.io","mixpanel.com","segment.io","crashlytics.com","onesignal.com","facebook.net","graph.facebook.com","scorecardresearch.com","criteo.com","criteo.net","adnxs.com","mobon.net","kakaoad.com","ad.naver.com","adcr.naver.com","tenping.kr","inmobi.com","unity3d.com","applovin.com","ironsrc.mobi"]},
+  {k:"sys", label:"Apple 시스템", sens:-2, d:["apple.com","icloud.com","icloud-content.com","mzstatic.com","aaplimg.com","apple-dns.net","cdn-apple.com","apple-cloudkit.com","itunes.apple.com"]}
+];
+const CAT_BY_K = Object.fromEntries(CATS.map(c => [c.k, c]));
+const OTHER = {k:"other", label:"기타", sens:0};
+// track & sys are checked first so e.g. graph.facebook.com is tracking, not SNS
+const CAT_ORDER = ["track","sys","work","job","work-com","health","date","fin","video","game","shop","sns","msg","portal"].map(k => CAT_BY_K[k]);
+const catCache = new Map();
+function catOfDomain(dom){
+  dom = String(dom || "").toLowerCase().replace(/\.$/,"");
+  if(catCache.has(dom)) return catCache.get(dom);
+  let found = OTHER;
+  outer: for(const c of CAT_ORDER){ for(const s of c.d){ if(dom === s || dom.endsWith("." + s)){ found = c; break outer; } } }
+  catCache.set(dom, found);
+  return found;
+}
+const APP_NAMES = {
+  "com.iwilab.KakaoTalk":"카카오톡","com.nhncorp.NaverSearch":"네이버","com.google.ios.youtube":"유튜브","com.burbn.instagram":"인스타그램",
+  "com.facebook.Facebook":"페이스북","com.atebits.Tweetie2":"X(트위터)","com.zhiliaoapp.musically":"틱톡","com.apple.mobilesafari":"Safari",
+  "com.google.chrome.ios":"Chrome","com.google.Gmail":"Gmail","com.apple.Maps":"Apple 지도","com.google.Maps":"Google 지도",
+  "com.netflix.Netflix":"넷플릭스","com.spotify.client":"Spotify","com.vivarepublica.toss":"토스","com.linkedin.LinkedIn":"LinkedIn",
+  "com.tinyspeck.chatlyio":"Slack","com.microsoft.skype.teams":"Teams","com.microsoft.Office.Outlook":"Outlook","com.apple.weather":"날씨",
+  "com.apple.camera":"카메라","com.apple.mobileslideshow":"사진","com.apple.MobileSMS":"메시지","com.apple.mobilemail":"Mail",
+  "com.coupang.Coupang":"쿠팡","com.mailplug.workspace":"메일플러그 (샘플)","com.sample.weather":"날씨 앱 (샘플)","com.sample.naviapp":"지도 앱 (샘플)"
+};
+function appName(b){
+  if(!b) return "알 수 없음";
+  if(APP_NAMES[b]) return APP_NAMES[b];
+  const parts = b.split("."); return parts[parts.length - 1] || b;
+}
+const ACC_LABEL = {location:"위치", camera:"카메라", microphone:"마이크", contacts:"연락처", photos:"사진", mediaLibrary:"미디어 보관함", screenRecording:"화면 녹화", calendar:"캘린더", calendars:"캘린더", reminders:"미리 알림", bluetooth:"블루투스", motion:"동작·피트니스", health:"건강"};
+
+/* settings */
+const DEF_SET = {days:[1,2,3,4,5], start:"09:00", end:"18:00", kw:"mailplug", buf:30};
+let settings = Object.assign({}, DEF_SET, store.get(SET_KEY) || {});
+function renderSettings(){
+  $("#days").innerHTML = [1,2,3,4,5,6,0].map(d => `<label><input type="checkbox" value="${d}" ${settings.days.includes(d) ? "checked" : ""}>${DOW[d]}</label>`).join("");
+  $("#wStart").value = settings.start; $("#wEnd").value = settings.end; $("#workKw").value = settings.kw; $("#wBuf").value = String(settings.buf ?? 30);
+  const upd = () => {
+    settings = {days:[...$("#days").querySelectorAll("input:checked")].map(i => +i.value), start:$("#wStart").value || "09:00", end:$("#wEnd").value || "18:00", kw:$("#workKw").value, buf:+$("#wBuf").value};
+    store.set(SET_KEY, settings);
+    if(report) analyzeAndRenderReport();
+  };
+  $("#days").querySelectorAll("input").forEach(i => i.addEventListener("change", upd));
+  ["#wStart","#wEnd","#workKw","#wBuf"].forEach(s => $(s).addEventListener("change", upd));
+}
+const toMin = s => { const [h,m] = String(s).split(":").map(Number); return (h||0)*60 + (m||0); };
+// "work" = core hours, "edge" = within the commute buffer, "off" = outside
+function zone(d){
+  if(!settings.days.includes(d.getDay())) return "off";
+  const m = d.getHours()*60 + d.getMinutes(), s = toMin(settings.start), e = toMin(settings.end), b = +settings.buf || 0;
+  if(m >= s && m < e) return "work";
+  if(m >= s - b && m < e + b) return "edge";
+  return "off";
+}
+const isWork = d => zone(d) !== "off";
+function isWorkApp(b){
+  const kws = String(settings.kw || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+  const s = String(b || "").toLowerCase();
+  return kws.some(k => s.includes(k));
+}
+
+/* parse */
+let report = null, reportIsSample = false;
+function parseReport(text){
+  const acc = [], net = [], open = {};
+  let bad = 0, rows = [];
+  const t = text.trim();
+  if(t.startsWith("[")){ try{ rows = JSON.parse(t); }catch(e){ rows = []; } }
+  else{
+    for(const line of t.split(/\r?\n/)){
+      const l = line.trim(); if(!l) continue;
+      try{ rows.push(JSON.parse(l)); }catch(e){ bad++; }
+    }
+  }
+  for(const o of rows){
+    if(!o || typeof o !== "object") continue;
+    if(o.type === "access" || (o.category && o.accessor)){
+      const bundle = (o.accessor && o.accessor.identifier) || o.bundleID || "";
+      const ts = new Date(o.timeStamp);
+      if(isNaN(ts)) continue;
+      const rec = {bundle, cat:o.category || "", start:ts, end:ts};
+      if(o.kind === "intervalBegin" && o.identifier){ open[o.identifier] = rec; }
+      else if(o.kind === "intervalEnd" && o.identifier && open[o.identifier]){ open[o.identifier].end = ts; acc.push(open[o.identifier]); delete open[o.identifier]; }
+      else acc.push(rec);
+    } else if(o.type === "networkActivity" || (o.domain && o.bundleID)){
+      const ts = new Date(o.timeStamp);
+      if(isNaN(ts)) continue;
+      const first = o.firstTimeStamp ? new Date(o.firstTimeStamp) : ts;
+      net.push({bundle:o.bundleID || "", domain:String(o.domain || "").toLowerCase(), ts, first:isNaN(first) ? ts : first, hits:+o.hits || 1, ctx:String(o.context || "").toLowerCase(), owner:o.domainOwner || "", initiated:o.initiatedType || ""});
+    }
+  }
+  Object.values(open).forEach(r => acc.push(r));
+  acc.sort((a,b) => a.start - b.start); net.sort((a,b) => a.ts - b.ts);
+  return {acc, net, bad, total:rows.length};
+}
+
+/* sample */
+function makeSample(){
+  const L = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+  let uid = 0;
+  const at = (dayOff, h, m) => { const d = new Date(now); d.setDate(d.getDate() - dayOff); d.setHours(h, m, Math.floor(Math.random()*50), 0); return d; };
+  const iso = d => { const z = -d.getTimezoneOffset(), s = z >= 0 ? "+" : "-"; return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())+".000"+s+pad(Math.floor(Math.abs(z)/60))+":"+pad(Math.abs(z)%60); };
+  const acc = (b, cat, d, sec) => { const id = "S" + (uid++); const e = new Date(d.getTime() + (sec||8)*1000);
+    L.push({type:"access", accessor:{identifier:b, identifierType:"bundleID"}, category:cat, identifier:id, kind:"intervalBegin", timeStamp:iso(d), version:7});
+    L.push({type:"access", accessor:{identifier:b, identifierType:"bundleID"}, category:cat, identifier:id, kind:"intervalEnd", timeStamp:iso(e), version:7}); };
+  const net = (b, dom, d, hits, ctx) => { L.push({type:"networkActivity", bundleID:b, domain:dom, firstTimeStamp:iso(new Date(d.getTime() - 60000)), timeStamp:iso(d), hits:hits||3, domainType:2, initiatedType:"AppInitiated", context:ctx||""}); };
+  const MP = "com.mailplug.workspace", KT = "com.iwilab.KakaoTalk", SF = "com.apple.mobilesafari", YT = "com.google.ios.youtube";
+  for(let off = 6; off >= 0; off--){
+    const d = at(off, 12, 0); const dow = d.getDay(); const wk = dow >= 1 && dow <= 5;
+    if(wk){
+      acc(MP, "location", at(off, 8, 52 + (off % 5)));
+      acc(MP, "location", at(off, 18, 3 + (off % 4)));
+      if(off % 2 === 0) acc(MP, "location", at(off, 12, 41));
+      if(off === 2) acc(MP, "location", at(off, 21, 37));
+      if(off === 4) acc(MP, "location", at(off, 23, 8));
+      net(MP, "ws.mailplug.com", at(off, 8, 53), 40); net(MP, "api.mailplug.com", at(off, 10, 20), 25); net(MP, "api.mailplug.com", at(off, 15, 5), 30);
+      net(MP, "app-measurement.com", at(off, 9, 2), 6); if(off === 2) net(MP, "ws.mailplug.com", at(off, 21, 38), 12);
+      net(KT, "talk.kakao.com", at(off, 9, 30), 60); net(KT, "talk.kakao.com", at(off, 14, 10), 45);
+      net("com.nhncorp.NaverSearch", "m.naver.com", at(off, 10, 5), 20); net("com.nhncorp.NaverSearch", "news.pstatic.net", at(off, 10, 6), 12);
+      net(YT, "rr3---sn-ab5l6nr6.googlevideo.com", at(off, 12, 35), 120); net(YT, "i.ytimg.com", at(off, 12, 36), 30);
+      net(SF, "www.coupang.com", at(off, 11, 18), 14, "coupang.com");
+      net("com.vivarepublica.toss", "api.toss.im", at(off, 10, 2), 9);
+      if(off === 1 || off === 3) net(SF, "www.saramin.co.kr", at(off, 15, 12), 22, "saramin.co.kr");
+      if(off === 3) net(SF, "www.wanted.co.kr", at(off, 15, 40), 15, "wanted.co.kr");
+      if(off === 1) net("com.linkedin.LinkedIn", "www.linkedin.com", at(off, 16, 5), 18);
+      if(off % 3 === 0) net(SF, "www.teamblind.com", at(off, 16, 44), 11, "teamblind.com");
+      net("com.burbn.instagram", "scontent-ssn1-1.cdninstagram.com", at(off, 13, 5), 70); net("com.burbn.instagram", "graph.facebook.com", at(off, 13, 6), 8);
+      net("com.coupang.Coupang", "cmapi.coupang.com", at(off, 17, 20), 16); net("com.coupang.Coupang", "app.adjust.com", at(off, 17, 21), 10);
+      net("com.coupang.Coupang", "api2.amplitude.com", at(off, 17, 22), 12);
+      net("com.sample.weather", "api.weather.example", at(off, 7, 50), 3); acc("com.sample.weather", "location", at(off, 7, 50));
+      net("com.apple.weather", "weatherkit.apple.com", at(off, 8, 10), 4);
+    } else {
+      acc("com.sample.naviapp", "location", at(off, 14, 20), 600);
+      if(off % 7 === 6 || off === 0) acc(MP, "location", at(off, 14, 22));
+      net(YT, "rr1---sn-ab5l6nr6.googlevideo.com", at(off, 21, 0), 200);
+      net("com.netflix.Netflix", "occ-0-993-325.1.nflxso.net", at(off, 22, 10), 150);
+    }
+    net(KT, "talk.kakao.com", at(off, 20, 15), 50);
+    net(YT, "rr5---sn-ab5l6nr6.googlevideo.com", at(off, 22, 30), 90);
+    if(off === 5) acc("com.iwilab.KakaoTalk", "camera", at(off, 19, 5), 20);
+    if(off === 2) acc("com.iwilab.KakaoTalk", "photos", at(off, 12, 50), 30);
+    if(off === 4) acc("com.iwilab.KakaoTalk", "microphone", at(off, 13, 2), 45);
+    acc("com.burbn.instagram", "photos", at(off, 13, 4), 15);
+    if(off === 1) acc(MP, "contacts", at(off, 9, 15), 3);
+  }
+  return L.map(o => JSON.stringify(o)).join("\n");
+}
+
+/* analyze & render */
+let repAnalysis = null;
+function analyzeAndRenderReport(){
+  const R = report;
+  const days = [...new Set([...R.acc.map(a => dayKey(a.start)), ...R.net.map(n => dayKey(n.ts))])].sort();
+  const loc = R.acc.filter(a => a.cat === "location");
+  const locW = loc.filter(a => isWorkApp(a.bundle));
+  const workNet = R.net.filter(n => isWork(n.ts));
+  const site = n => (n.bundle === "com.apple.mobilesafari" && n.ctx) ? n.ctx : n.domain;
+  const workNetC = workNet.map(n => ({...n, site:site(n), cat:catOfDomain(site(n))}));
+  const sens = workNetC.filter(n => n.cat.sens >= 2);
+
+  // stats
+  const outLocW = locW.filter(a => !isWork(a.start));
+  const first = days[0], last = days[days.length - 1];
+  const stats = [
+    ["분석 기간", days.length + "일", ""],
+    ["업무용 앱 위치 접근", locW.length + "회", ""],
+    ["그중 근무시간 외", outLocW.length + "회", outLocW.length ? "alert" : ""],
+    ["근무시간 민감 접속", sens.length + "건", sens.length ? "alert" : ""]
+  ];
+  $("#stats").innerHTML = stats.map(([k,v,c]) => `<div class="stat ${c}"><div class="v">${esc(v)}</div><div class="k">${esc(k)}</div></div>`).join("");
+  $("#periodNote").textContent = (first ? first + " ~ " + last : "기록 없음") + " · 앱 " + new Set([...R.acc.map(a=>a.bundle), ...R.net.map(n=>n.bundle)]).size + "개 · 통신 기록 " + R.net.length + "건 · 권한 접근 " + R.acc.length + "건" + (R.bad ? " · 읽지 못한 줄 " + R.bad + "개" : "") + (reportIsSample ? " · 샘플 데이터" : "");
+
+  // work app location timeline
+  if(!locW.length){
+    $("#locWork").innerHTML = `<p class="note" style="margin:0">'${esc(settings.kw)}'에 해당하는 업무용 앱의 위치 접근 기록이 없어요. 업무용 앱 찾을 단어를 확인해 보세요. 아래 '앱별 위치 접근' 표에서 앱 ID를 확인할 수 있어요.</p>`;
+  } else {
+    const names = [...new Set(locW.map(a => appName(a.bundle)))].join(", ");
+    const edge = locW.filter(a => zone(a.start) === "edge").length;
+    const lateEve = outLocW.filter(a => a.start.getHours() >= 20 || a.start.getHours() < 6);
+    const weekend = outLocW.filter(a => !settings.days.includes(a.start.getDay()));
+    let verdict;
+    if(!outLocW.length) verdict = {sev:"ok", t:"근무시간 안에서만 위치에 접근했어요", s:(edge ? "출퇴근 시간대 " + edge + "회는 출근·퇴근 체크로 보여요. " : "") + "그 밖의 시간에는 접근 기록이 없어요."};
+    else verdict = {sev:"warn", t:"근무시간 밖에서 " + outLocW.length + "회 접근했어요", s:[edge ? "출퇴근 시간대 " + edge + "회는 체크로 보여 제외" : "", lateEve.length ? "밤 시간대 " + lateEve.length + "회" : "", weekend.length ? "휴일 " + weekend.length + "회" : ""].filter(Boolean).join(" · ") + ". '앱을 사용하는 동안' 권한이라 그 시간에 앱을 열었을 가능성이 커요. 열지 않았는데 기록이 있다면 확인이 필요해요."};
+    $("#locWork").innerHTML = `
+      <ul class="items" style="margin-top:0"><li><span class="pill ${verdict.sev}">${verdict.sev === "ok" ? "정상" : "확인"}</span><div><b>${esc(names)}: ${esc(verdict.t)}</b><span class="s">${esc(verdict.s)}</span></div></li></ul>
+      <ul class="tl">${locW.slice().reverse().map(a => {
+        const z = zone(a.start); const dur = Math.max(1, Math.round((a.end - a.start)/1000));
+        return `<li><span class="tm">${esc(fmtDT(a.start))}</span><span class="pill ${z === "off" ? "warn" : z === "edge" ? "ok" : "info"}">${z === "off" ? "근무 외" : z === "edge" ? "출퇴근 시간대" : "근무시간"}</span><span style="color:var(--muted);font-size:12px">${dur < 60 ? dur + "초" : Math.round(dur/60) + "분"}</span></li>`;
+      }).join("")}</ul>`;
+  }
+
+  repAnalysis = {days, loc, locW, workNetC, sens};
+  renderHeat();
+
+  // per-app location table
+  const byApp = {};
+  loc.forEach(a => { const o = byApp[a.bundle] = byApp[a.bundle] || {n:0, w:0, o:0, last:null}; o.n++; isWork(a.start) ? o.w++ : o.o++; if(!o.last || a.start > o.last) o.last = a.start; });
+  const rows = Object.entries(byApp).sort((a,b) => b[1].n - a[1].n);
+  $("#locTable").innerHTML = rows.length ? `<tr><th>앱</th><th class="n">전체</th><th class="n">근무 외</th><th class="n">마지막</th></tr>` + rows.map(([b,o]) => `<tr><td>${esc(appName(b))}${isWorkApp(b) ? ' <span class="pill info">업무</span>' : ""}<div class="dom" style="color:var(--muted);font-size:11px">${esc(b)}</div></td><td class="n">${o.n}</td><td class="n">${o.o}</td><td class="n">${esc(fmtDT(o.last))}</td></tr>`).join("") : `<tr><td class="note">위치 접근 기록이 없어요.</td></tr>`;
+
+  // category bars (work hours, by hits, exclude sys)
+  const catAgg = {};
+  workNetC.forEach(n => { if(n.cat.k === "sys") return; const c = catAgg[n.cat.k] = catAgg[n.cat.k] || {cat:n.cat, hits:0, n:0}; c.hits += n.hits; c.n++; });
+  const cats = Object.values(catAgg).sort((a,b) => b.hits - a.hits);
+  const max = Math.max(1, ...cats.map(c => c.hits));
+  $("#catBars").innerHTML = cats.length ? cats.map(c => `<div class="hb" title="${esc(c.cat.label)}: 요청 ${c.hits}회, 기록 ${c.n}건"><span>${esc(c.cat.label)}${c.cat.sens >= 2 ? ' <span class="pill warn" style="font-size:10px;padding:1px 5px">민감</span>' : ""}</span><span class="tr"><i class="${c.cat.sens >= 2 ? "s" : ""}" style="width:${(c.hits/max*100).toFixed(1)}%"></i></span><span class="n">${c.hits}</span></div>`).join("") + `<p class="note">숫자는 근무시간 중 요청 횟수예요. 'Apple 시스템' 통신은 제외했어요.</p>` : `<p class="note">근무시간 중 통신 기록이 없어요. 근무 요일·시간 설정을 확인해 보세요.</p>`;
+
+  // sensitive list
+  if(!sens.length){ $("#sensList").innerHTML = `<p class="note" style="margin:0">근무시간 중 구직·직장 커뮤니티·건강·데이팅·금융 사이트 접속이 없어요.</p>`; }
+  else {
+    const g = {};
+    sens.forEach(n => { const key = n.cat.k + "|" + n.site; const o = g[key] = g[key] || {cat:n.cat, site:n.site, apps:new Set(), times:[]}; o.apps.add(appName(n.bundle)); o.times.push(n.ts); });
+    const list = Object.values(g).sort((a,b) => b.cat.sens - a.cat.sens || b.times.length - a.times.length);
+    $("#sensList").innerHTML = `<ul class="items" style="margin-top:0">` + list.map(o => `<li><span class="pill ${o.cat.sens >= 3 ? "bad" : "warn"}">${esc(o.cat.label)}</span><div><b class="dom">${esc(o.site)}</b><span class="s">${esc([...o.apps].join(", "))} · ${o.times.length}회 · ${esc(o.times.slice(0,4).map(fmtDT).join(", "))}${o.times.length > 4 ? " 외" : ""}</span></div></li>`).join("") + `</ul><p class="note">회사 장비에는 이 사이트 이름과 시각이 남을 수 있어요. 페이지 내용(공고 제목, 글 내용)은 루트 인증서가 없으면 남지 않아요.</p>`;
+  }
+
+  // work app network
+  const wn = R.net.filter(n => isWorkApp(n.bundle));
+  if(!wn.length){ $("#workNet").innerHTML = `<p class="note" style="margin:0">업무용 앱의 통신 기록이 없어요.</p>`; }
+  else {
+    const g = {};
+    wn.forEach(n => { const o = g[n.domain] = g[n.domain] || {hits:0, n:0, out:0, cat:catOfDomain(n.domain)}; o.hits += n.hits; o.n++; if(!isWork(n.ts)) o.out++; });
+    const list = Object.entries(g).sort((a,b) => b[1].hits - a[1].hits);
+    const thirdParty = list.filter(([,o]) => o.cat.k !== "work" && o.cat.k !== "sys");
+    $("#workNet").innerHTML = `<table class="t"><tr><th>도메인</th><th class="n">요청</th><th class="n">근무 외</th></tr>` + list.map(([d,o]) => `<tr><td><span class="dom">${esc(d)}</span> <span class="pill ${o.cat.k === "track" ? "warn" : "info"}" style="font-size:10px">${esc(o.cat.label)}</span></td><td class="n">${o.hits}</td><td class="n">${o.out}</td></tr>`).join("") + `</table>` +
+      `<p class="note">${thirdParty.length ? "업무용 앱이 회사 서버 외에 " + thirdParty.map(([d]) => d).join(", ") + "에도 데이터를 보내요. 광고·분석 SDK가 들어 있다는 뜻이에요." : "업무용 앱은 자체 서버와만 통신했어요."} 위치 좌표가 실제로 어느 서버로 갔는지는 리포트로 알 수 없어요.</p>`;
+  }
+
+  // other access
+  const oth = R.acc.filter(a => a.cat !== "location");
+  if(!oth.length){ $("#otherAcc").innerHTML = `<p class="note" style="margin:0">위치 외 권한 접근 기록이 없어요.</p>`; }
+  else {
+    const g = {};
+    oth.forEach(a => { const k = a.bundle + "|" + a.cat; const o = g[k] = g[k] || {b:a.bundle, c:a.cat, n:0, last:a.start}; o.n++; if(a.start > o.last) o.last = a.start; });
+    const list = Object.values(g).sort((a,b) => (isWorkApp(b.b) - isWorkApp(a.b)) || b.n - a.n);
+    $("#otherAcc").innerHTML = `<table class="t"><tr><th>앱</th><th>권한</th><th class="n">횟수</th><th class="n">마지막</th></tr>` + list.map(o => `<tr><td>${esc(appName(o.b))}${isWorkApp(o.b) ? ' <span class="pill warn">업무</span>' : ""}</td><td style="white-space:nowrap">${esc(ACC_LABEL[o.c] || o.c)}</td><td class="n">${o.n}</td><td class="n">${esc(fmtDT(o.last))}</td></tr>`).join("") + `</table>` + (list.some(o => isWorkApp(o.b)) ? `<p class="note">업무용 앱이 위치 외 권한에도 접근했어요. 필요한 기능(첨부 사진, 연락처 동기화 등)인지 확인해 보세요.</p>` : "");
+  }
+
+  // trackers
+  const tr = {};
+  R.net.forEach(n => { if(catOfDomain(n.domain).k !== "track") return; const o = tr[n.bundle] = tr[n.bundle] || {hits:0, doms:new Set()}; o.hits += n.hits; o.doms.add(n.domain); });
+  const tl = Object.entries(tr).sort((a,b) => b[1].hits - a[1].hits).slice(0, 6);
+  const tmax = Math.max(1, ...tl.map(([,o]) => o.hits));
+  $("#trackers").innerHTML = tl.length ? tl.map(([b,o]) => `<div class="hb" style="grid-template-columns:110px 1fr 44px" title="${esc([...o.doms].join(", "))}"><span>${esc(appName(b))}</span><span class="tr"><i style="width:${(o.hits/tmax*100).toFixed(1)}%"></i></span><span class="n">${o.hits}</span></div>`).join("") + `<p class="note">광고·분석 업체로 보낸 요청 수예요. 막대를 길게 누르면 도메인이 보여요. 회사가 아니라 각 앱 개발사가 수집하는 정보예요.</p>` : `<p class="note" style="margin:0">알려진 광고·추적 서버와의 통신이 없어요.</p>`;
+
+  $("#repOut").classList.remove("hidden");
+}
+
+function renderHeat(){
+  if(!repAnalysis) return;
+  const sel = document.querySelector('input[name="hsel"]:checked').value;
+  const src = sel === "work" ? repAnalysis.locW : repAnalysis.loc;
+  const days = repAnalysis.days.slice(-8);
+  const grid = {}; let max = 0;
+  src.forEach(a => { const k = dayKey(a.start) + "|" + a.start.getHours(); const o = grid[k] = grid[k] || {n:0, apps:{}}; o.n++; o.apps[appName(a.bundle)] = (o.apps[appName(a.bundle)] || 0) + 1; max = Math.max(max, o.n); });
+  const sh = toMin(settings.start)/60, eh = toMin(settings.end)/60;
+  let html = `<div class="rl"></div>` + Array.from({length:24}, (_,h) => `<div class="hl">${h % 6 === 0 ? h : ""}</div>`).join("");
+  days.forEach(dk => {
+    const [y,mo,da] = dk.split("-").map(Number); const d = new Date(y, mo-1, da);
+    const wd = settings.days.includes(d.getDay());
+    html += `<div class="rl">${esc(fmtD(d))}</div>`;
+    for(let h = 0; h < 24; h++){
+      const o = grid[dk + "|" + h];
+      const n = o ? o.n : 0;
+      const pct = n ? Math.round(30 + 70 * n / Math.max(1, max)) : 0;
+      const bg = n ? `background:color-mix(in srgb, var(--accent) ${pct}%, var(--card))` : "";
+      const w = wd && h >= Math.floor(sh) && h < Math.ceil(eh);
+      html += `<div class="c${w ? " w" : ""}" style="${bg}" data-k="${esc(dk)}|${h}" title="${esc(fmtD(d))} ${h}시: ${n}회"></div>`;
+    }
+  });
+  const hm = $("#heat");
+  hm.style.gridTemplateColumns = "58px repeat(24, minmax(0, 1fr))";
+  hm.innerHTML = days.length ? html : `<p class="note">기록이 없어요.</p>`;
+  hm.querySelectorAll(".c").forEach(c => c.addEventListener("click", () => {
+    const [dk, h] = c.dataset.k.split("|"); const o = grid[dk + "|" + h];
+    const [y,mo,da] = dk.split("-").map(Number);
+    $("#heatCap").textContent = fmtD(new Date(y, mo-1, da)) + " " + h + "시대: " + (o ? Object.entries(o.apps).map(([k,v]) => k + " " + v + "회").join(", ") : "위치 접근 없음") + (isWork(new Date(y, mo-1, da, +h, 0)) ? " (근무시간)" : " (근무시간 외)");
+  }));
+  $("#heatLegend").innerHTML = `<span>적음</span><i style="background:color-mix(in srgb, var(--accent) 30%, var(--card))"></i><i style="background:color-mix(in srgb, var(--accent) 65%, var(--card))"></i><i style="background:var(--accent)"></i><span>많음</span><span style="margin-left:10px"><i style="background:var(--line);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);vertical-align:-2px"></i> 테두리 = 근무시간</span>`;
+}
+document.querySelectorAll('input[name="hsel"]').forEach(r => r.addEventListener("change", renderHeat));
+
+function loadReportText(text, isSample, label){
+  const R = parseReport(text);
+  if(!R.acc.length && !R.net.length){
+    $("#fileInfo").textContent = "이 파일에서 리포트 기록을 찾지 못했어요. '앱 활동 저장'으로 받은 .ndjson 파일인지 확인해 주세요.";
+    return;
+  }
+  report = R; reportIsSample = isSample;
+  $("#fileInfo").textContent = (isSample ? "샘플 데이터를 불러왔어요. 실제 기록이 아니에요." : "불러옴: " + label) ;
+  $("#exportGuide").open = false;
+  analyzeAndRenderReport();
+  $("#repOut").scrollIntoView({behavior:"smooth", block:"start"});
+}
+$("#file").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  if(f.size > 60 * 1024 * 1024){ $("#fileInfo").textContent = "파일이 너무 커요 (60MB 초과)."; return; }
+  $("#fileInfo").textContent = "읽는 중…";
+  const rd = new FileReader();
+  rd.onload = () => loadReportText(String(rd.result || ""), false, f.name);
+  rd.onerror = () => { $("#fileInfo").textContent = "파일을 읽지 못했어요."; };
+  rd.readAsText(f);
+});
+$("#sample").addEventListener("click", () => loadReportText(makeSample(), true));
+
+/* ================= TAB 3: admin preview ================= */
+let admFilter = "all";
+function renderAdmin(){
+  let R = report, sample = reportIsSample;
+  if(!R){ R = parseReport(makeSample()); sample = true; }
+  const nr = lastNetResult;
+  const lv = nr ? nr.lv : null;
+  const relay = nr ? nr.sig.domainHidden : false;
+  const blockedCats = nr ? nr.sig.blockedCats : [];
+  $("#admSrc").innerHTML = (sample ? "현재 <b>샘플 기록</b>으로 채웠어요. '기록 분석' 탭에서 내 리포트를 올리면 실제 기록으로 바뀌어요." : "'기록 분석' 탭에서 올린 <b>내 리포트</b>의 근무시간 기록으로 채웠어요.") + " " + (nr ? "네트워크 진단 결과(노출 " + lv + "단계)를 반영했어요." : "네트워크 진단을 먼저 하면 내용 열람 여부·차단 여부가 반영돼요.");
+
+  const site = n => (n.bundle === "com.apple.mobilesafari" && n.ctx) ? n.ctx : n.domain;
+  const rows = R.net.filter(n => isWork(n.ts)).map(n => ({...n, site:site(n), cat:catOfDomain(site(n))})).filter(n => n.cat.k !== "sys");
+  rows.sort((a,b) => a.ts - b.ts);
+
+  // device
+  const uname = manual.login === "yes" ? "<내 사번·계정 ID>" : "-";
+  const host = manual.name === "yes" ? "<내 이름>의 iPhone" : (manual.name === "no" ? "iPhone" : "<기기 이름>");
+  const mac = manual.mac === "off" ? "실제 MAC · 항상 동일" : manual.mac === "fixed" ? "비공개 MAC · 이 와이파이에서 항상 동일" : manual.mac === "rotating" ? "비공개 MAC · 주기적으로 바뀜" : "<MAC 주소>";
+  $("#admDev").innerHTML = `<dt>사용자</dt><dd>${esc(uname)}</dd><dt>기기 이름</dt><dd>${esc(host)}</dd><dt>MAC</dt><dd>${esc(mac)}</dd><dt>내부 IP</dt><dd>192.168.x.x (DHCP)</dd><dt>내용 열람</dt><dd>${lv === 4 ? '<span class="open">가능 (루트 인증서·가로채기)</span>' : '<span class="lock">불가 (암호화)</span>'}</dd>`;
+
+  const days = [...new Set(rows.map(r => dayKey(r.ts)))];
+  $("#admRange").textContent = days.length ? days[0].slice(5) + " ~ " + days[days.length-1].slice(5) + " · 근무시간" : "";
+
+  // chips
+  const present = [...new Set(rows.map(r => r.cat.k))];
+  const chipDefs = [["all","전체"], ["sens","민감"], ...CATS.filter(c => present.includes(c.k) && c.k !== "sys").map(c => [c.k, c.label]), ...(present.includes("other") ? [["other","기타"]] : [])];
+  if(!chipDefs.some(c => c[0] === admFilter)) admFilter = "all";
+  $("#admChips").innerHTML = chipDefs.map(([k,l]) => `<button data-k="${k}" class="${admFilter === k ? "on" : ""}">${esc(l)}</button>`).join("");
+  $("#admChips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { admFilter = b.dataset.k; renderAdmin(); }));
+
+  const filtered = rows.filter(r => admFilter === "all" || (admFilter === "sens" ? r.cat.sens >= 2 : r.cat.k === admFilter));
+  let html = "", lastDay = "";
+  filtered.slice(-300).forEach(r => {
+    const dk = dayKey(r.ts);
+    if(dk !== lastDay){ html += `<div class="lg"><div class="day">${esc(fmtD(r.ts))}</div></div>`; lastDay = dk; }
+    const hidden = relay && r.bundle === "com.apple.mobilesafari";
+    const blocked = blockedCats.includes(r.cat.k);
+    const dest = hidden ? "Apple 비공개 릴레이 (사이트 숨김)" : r.site;
+    const content = lv === 4 ? '<span class="open">URL·내용 열람 가능</span>' : '<span class="lock">내용: 암호화</span>';
+    html += `<div class="lg"><span class="tm">${esc(fmtT(r.ts))}</span><span class="ds">${esc(dest)}</span><span class="act ${blocked ? "b" : "a"}">${blocked ? "차단" : "허용"}</span><span class="meta">${esc(hidden ? "분류 불가" : r.cat.label)} · 요청 ${r.hits}회 · ${content}</span></div>`;
+  });
+  $("#admLog").innerHTML = html || `<p style="color:var(--console-muted)">근무시간 기록이 없어요.</p>`;
+
+  // inferences
+  const inf = [];
+  const byDay = {};
+  rows.forEach(r => { const k = dayKey(r.ts); const o = byDay[k] = byDay[k] || {first:r.ts, last:r.ts}; if(r.ts < o.first) o.first = r.ts; if(r.ts > o.last) o.last = r.ts; });
+  const allDay = {};
+  R.net.forEach(r => { if(!settings.days.includes(r.ts.getDay())) return; const k = dayKey(r.ts); const o = allDay[k] = allDay[k] || []; o.push(r.ts); });
+  const dk = Object.keys(byDay).sort();
+  if(dk.length){
+    const fm = dk.map(k => byDay[k].first.getHours()*60 + byDay[k].first.getMinutes());
+    const lm = dk.map(k => byDay[k].last.getHours()*60 + byDay[k].last.getMinutes());
+    const avg = a => { const m = Math.round(a.reduce((x,y) => x+y, 0) / a.length); return pad(Math.floor(m/60)) + ":" + pad(m%60); };
+    inf.push(["info", "출근·퇴근 시각", "와이파이 첫 통신 평균 " + avg(fm) + ", 마지막 통신 평균 " + avg(lm) + " (" + dk.length + "일). 접속 기록만으로 출퇴근 시각을 추정할 수 있어요."]);
+  }
+  const catHits = {};
+  rows.forEach(r => { catHits[r.cat.k] = (catHits[r.cat.k] || 0) + r.hits; });
+  const sensRows = rows.filter(r => r.cat.sens >= 2 && !(relay && r.bundle === "com.apple.mobilesafari"));
+  if(sensRows.length){
+    const g = {}; sensRows.forEach(r => { g[r.cat.label] = g[r.cat.label] || new Set(); g[r.cat.label].add(r.site); });
+    Object.entries(g).forEach(([l, s]) => inf.push([CATS.find(c => c.label === l).sens >= 3 ? "bad" : "warn", l + " 접속", [...s].slice(0,3).join(", ") + (s.size > 3 ? " 외" : "") + " — 근무시간 중 " + sensRows.filter(r => r.cat.label === l).length + "건"]));
+  }
+  const leisure = ["video","sns","shop","game"].filter(k => catHits[k]);
+  if(leisure.length) inf.push(["warn", "업무 외 사용", leisure.map(k => CAT_BY_K[k].label + " " + catHits[k] + "회").join(", ") + " (요청 수 기준)"]);
+  if(relay) inf.push(["ok", "Safari 방문 사이트", "비공개 릴레이 때문에 Safari로 방문한 사이트 이름은 보이지 않아요. 앱 통신은 보여요."]);
+  if(lv === 4) inf.push(["bad", "내용 열람", "루트 인증서·가로채기 구조라 메시지·검색어 같은 내용까지 볼 수 있는 상태예요."]);
+  else inf.push(["ok", "메시지·검색어 내용", "암호화돼 있어서 볼 수 없어요. 카톡 대화, 검색어, 공고 제목 같은 건 이 화면에 나오지 않아요."]);
+  if(manual.login === "yes") inf.push(["bad", "누구의 기록인지", "계정 로그인 와이파이라 위 기록이 전부 내 계정 이름으로 정리돼요."]);
+  else if(manual.name === "yes" || manual.mac === "off" || manual.mac === "fixed") inf.push(["warn", "누구의 기록인지", "기기 이름·고정 주소로 내 폰이라는 걸 알 수 있어요."]);
+  const PL = {ok:"보호",warn:"노출",bad:"위험",info:"참고"};
+  $("#infer").innerHTML = inf.map(([s,t,d]) => `<li style="list-style:none;display:flex;gap:10px;margin:0;padding:9px 0;border-top:1px solid var(--line)"><span class="pill ${s}">${PL[s]}</span><div><b style="display:block;font-size:14.5px">${esc(t)}</b><span style="color:var(--muted);font-size:13px">${esc(d)}</span></div></li>`).join("");
+  $("#infer").style.padding = "0"; $("#infer").style.margin = "0";
+}
+
+/* init */
 renderManual();
 renderBaseInfo();
+renderSettings();
 })();
 </script>
 </body>
