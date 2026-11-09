@@ -93,6 +93,7 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 /* ---------- onboarding ---------- */
 .steps{counter-reset:s;list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
 .steps>li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:12px 14px}
+.steps>li>div{min-width:0}
 .steps>li::before{content:counter(s);width:30px;height:30px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-weight:800;display:grid;place-items:center;font-size:14px}
 .steps b{display:block;font-size:14.5px}
 .steps span.d{display:block;font-size:13px;color:var(--muted);margin-top:2px}
@@ -331,6 +332,34 @@ details.guide[open] summary::before{transform:rotate(90deg)}
 .soonbox .ic svg{width:28px;height:28px}
 
 footer{padding:10px 0 40px;font-size:12px;color:var(--muted)}
+.hlink{border:0;background:none;color:#c9cfff;font-weight:700;font-size:12px;cursor:pointer;padding:0 0 0 4px;text-decoration:underline;text-underline-offset:3px}
+.gpoints{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.gpoints div{background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:12px}
+.gpoints .gi{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:12.5px;margin-bottom:6px}
+.gpoints b{display:block;font-size:14.5px}
+.gpoints span:last-child{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px}
+.gtabs button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-weight:650;font-size:13.5px;cursor:pointer}
+.gtabs button small{font-weight:500;color:var(--muted);margin-left:4px}
+.gtabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.gtabs button[aria-selected="true"] small{color:inherit;opacity:.7}
+.gpanel{display:none}.gpanel.on{display:block}
+.legendgrid{display:grid;gap:8px;margin-top:10px}
+.legendgrid div{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:start;font-size:13.5px}
+.legendgrid .pill{justify-self:start}
+.lvgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lvgrid div{background:var(--card2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.lvgrid b{display:block;font-size:14.5px;margin-bottom:2px}
+.lvgrid span{color:var(--muted)}
+.faq details.d p{margin:8px 0 0;font-size:13.5px;color:var(--ink2)}
+.notice ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink2)}
+.notice li{margin:5px 0}
+.notice h3{margin-top:16px}
+.firstvisit{display:flex;gap:12px;align-items:center;background:var(--accent-soft);border-radius:16px;padding:12px 14px;margin-bottom:14px}
+.firstvisit b{display:block;font-size:14.5px}
+.firstvisit span{font-size:13px;color:var(--ink2)}
+.firstvisit .x{margin-left:auto;border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 6px}
+@media (max-width:640px){ .gpoints{grid-template-columns:1fr} .lvgrid{grid-template-columns:1fr 1fr} .legendgrid div{grid-template-columns:1fr;gap:4px} }
 footer p{margin:6px 0}
 
 @media (max-width:640px){
@@ -348,7 +377,7 @@ footer p{margin:6px 0}
 <body>
 <header class="hero">
   <div class="wrap">
-    <div class="brand"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>PRIVACY GUARD<span class="ver">v0.4 시안</span></div>
+    <div class="brand"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>PRIVACY GUARD<span class="ver">v0.5 시안</span></div>
     <h1>회사가 본 <em>나의 하루</em></h1>
     <p class="lead">회사 와이파이와 회사 PC에 남는 기록으로 하루를 재구성해요. 무엇이 보이고, 무엇이 위험하고, 무엇은 안전한지 한눈에 알려 드려요.</p>
     <div class="plat" role="group" aria-label="기기 선택">
@@ -356,7 +385,7 @@ footer p{margin:6px 0}
       <button data-p="win" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Windows</button>
       <button data-p="and" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10 5h4"/></svg>Android <span class="soon">준비 중</span></button>
     </div>
-    <div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>기록 파일은 이 브라우저 안에서만 읽고, 어디로도 보내지 않아요.</div>
+    <div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>기록 파일은 이 브라우저 안에서만 읽고, 어디로도 보내지 않아요. <button class="hlink" data-goto="guide">사용법·안내 보기 →</button></div>
   </div>
 </header>
 
@@ -365,6 +394,7 @@ footer p{margin:6px 0}
   <button role="tab" data-tab="rep" aria-selected="false">분석 리포트</button>
   <button role="tab" data-tab="net" aria-selected="false">네트워크 검사</button>
   <button role="tab" data-tab="adm" aria-selected="false">관리자 화면</button>
+  <button role="tab" data-tab="guide" aria-selected="false">사용법·안내</button>
 </div></nav>
 
 <main class="wrap">
@@ -502,6 +532,117 @@ footer p{margin:6px 0}
       <div class="log" id="admLog"></div>
     </div>
     <p class="note">'내용: 암호화'로 표시되면 관리자는 접속한 사이트 이름까지만 볼 수 있어요. 메시지나 검색어 같은 내용은 볼 수 없어요.</p>
+  </section>
+
+  <!-- ============ GUIDE ============ -->
+  <section class="pane" id="pane-guide">
+    <section class="card guide-hero">
+      <div class="eyebrow">Guide</div>
+      <h2>PRIVACY GUARD는 이런 도구예요</h2>
+      <p class="sub" style="margin-top:6px">회사 와이파이나 회사 PC를 쓰다 보면 "회사는 내 기록을 어디까지 볼 수 있을까?" 궁금해지죠. PRIVACY GUARD는 <b>내 기기에 남은 내 기록</b>으로, 회사 장비에 남았을 하루를 재구성해서 보여 줘요. 무엇이 보이고, 무엇이 위험하고, 무엇은 안전한지 쉬운 말로 알려 드려요.</p>
+      <div class="gpoints">
+        <div><span class="gi">1</span><b>나의 하루</b><span>회사 네트워크에 머문 시간과 그때 남은 접속을 시간순으로</span></div>
+        <div><span class="gi">2</span><b>위험도 진단</b><span>구직·커뮤니티·금융처럼 알려지면 곤란한 접속을 따로 표시</span></div>
+        <div><span class="gi">3</span><b>안전한 처리</b><span>모든 분석은 내 브라우저 안에서만. 서버로 보내지 않아요</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">How to use</div>
+      <h2>사용법</h2>
+      <p class="sub">기기에 맞는 방법을 골라 주세요. 처음이라면 '샘플로 미리보기'로 먼저 둘러보는 걸 추천해요.</p>
+      <div class="gtabs" role="tablist">
+        <button data-g="ios" aria-selected="true">iPhone <small>약 3분</small></button>
+        <button data-g="win" aria-selected="false">Windows <small>약 3분</small></button>
+        <button data-g="net" aria-selected="false">네트워크 검사 <small>1분</small></button>
+      </div>
+      <div class="gpanel on" id="g-ios">
+        <ol class="steps">
+          <li><div><b>리포트 켜기 (처음 한 번)</b><span class="d">설정 → 개인정보 보호 및 보안 → 맨 아래 <b>앱 개인정보 보호 리포트</b> → 켜기. 켠 다음부터 기록이 쌓여요.</span></div></li>
+          <li><div><b>평일 2~3일 기다리기</b><span class="d">출근한 날의 기록이 있어야 하루가 그려져요. 리포트는 최근 7일치만 보관해요.</span></div></li>
+          <li><div><b>파일 저장하기</b><span class="d">같은 화면 맨 아래 <b>앱 활동 저장</b> → <b>"파일"에 저장</b>.</span></div></li>
+          <li><div><b>불러오기</b><span class="d">이 페이지 위쪽에서 <b>iPhone</b> 선택 → '나의 하루' 탭 → <b>리포트 파일 선택</b>.</span></div></li>
+          <li><div><b>근무 시간 맞추기</b><span class="d">'근무 시간' 버튼에서 요일·출퇴근·점심시간을 내 일정에 맞춰요. iPhone 리포트에는 와이파이 구분이 없어서 <b>근무시간 = 회사 와이파이</b>로 계산해요.</span></div></li>
+        </ol>
+      </div>
+      <div class="gpanel" id="g-win">
+        <ol class="steps">
+          <li><div><b>스크립트 받기</b><span class="d">위쪽에서 <b>Windows</b> 선택 → '나의 하루' 탭 → <b>스크립트 복사</b> 또는 <b>.ps1 파일로 받기</b>.</span></div></li>
+          <li><div><b>PowerShell 열기</b><span class="d"><span class="kbd">Win</span> + <span class="kbd">X</span> → <b>터미널</b> 또는 <b>Windows PowerShell</b> (관리자 아님).</span></div></li>
+          <li><div><b>실행하기</b><span class="d">복사했다면 오른쪽 클릭으로 붙여넣고 Enter. 파일로 받았다면 <b>다운로드 폴더에 그대로 둔 채</b> 아래 명령을 한 줄 통째로 넣어요.</span><div class="codebox" style="max-height:none">powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Downloads\PrivacyGuard-Windows.ps1"</div></div></li>
+          <li><div><b>완료 확인</b><span class="d">마지막 줄에 초록색 <code>Done. Saved: … (몇 MB)</code>가 나오면 성공이에요. 바탕화면에 <code>PrivacyGuard_result_날짜.json</code>이 생겨요.</span></div></li>
+          <li><div><b>불러오고 회사 네트워크 고르기</b><span class="d"><b>결과 파일 선택</b>으로 열고, '회사 네트워크 고르기'에서 회사 와이파이·유선을 <b>모두</b> 체크해요.</span></div></li>
+        </ol>
+        <p class="note">잘 안 될 때: 마지막 줄이 빨간색·노란색이면 그 화면을 캡처해 두세요. 다운로드 폴더에 같은 파일이 여러 개면 <code>(1)</code>이 붙은 파일 이름 때문에 명령이 예전 파일을 실행할 수 있어요.</p>
+      </div>
+      <div class="gpanel" id="g-net">
+        <ol class="steps">
+          <li><div><b>기준값 재기 (선택)</b><span class="d">셀룰러(LTE·5G)나 집 와이파이에서 '네트워크 검사' 탭 → <b>셀룰러/집</b> 선택 → <b>기준값 측정</b>. 비교 대상이 있으면 판정이 정확해져요.</span></div></li>
+          <li><div><b>회사 네트워크에서 검사</b><span class="d">회사 와이파이에 연결한 상태로 <b>회사 네트워크</b> 선택 → <b>검사 시작</b>.</span></div></li>
+          <li><div><b>직접 확인할 항목 답하기</b><span class="d">인증서·프록시·기기 이름처럼 브라우저가 읽을 수 없는 항목은 안내대로 설정 화면에서 확인해 골라요. Windows 결과 파일을 불러왔다면 상당수가 자동으로 채워져요.</span></div></li>
+        </ol>
+        <p class="note">네트워크 검사 결과는 '나의 하루'와 '분석 리포트'에도 자동으로 반영돼요.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Reading the results</div>
+      <h2>화면 읽는 법</h2>
+      <div class="legendgrid">
+        <div><span class="pill bad">위험도 높음</span><span>구직·이직, 직장인 커뮤니티, 병원·건강, 데이팅. 회사가 알면 불이익이나 오해로 이어질 수 있어요.</span></div>
+        <div><span class="pill warn">위험도 중간</span><span>금융·투자, 게임. 동영상·SNS도 하루 30분을 넘으면 중간으로 올라가요. 점심시간에만 쓴 기록은 한 단계 낮춰요.</span></div>
+        <div><span class="pill info">위험도 낮음</span><span>메신저, 포털, 쇼핑처럼 일상적인 사용이에요.</span></div>
+        <div><span class="pill acc">회사 네트워크</span><span>회사 와이파이·유선에 연결된 시간의 기록이에요 (Windows는 실제 연결 기록 기준).</span></div>
+        <div><span class="pill info">회사 와이파이 (추정)</span><span>iPhone은 와이파이 구분이 없어서, 근무시간 기록을 회사 와이파이로 가정한 거예요.</span></div>
+        <div><span class="pill warn">회사 PC 프로그램</span><span>보안 게이트웨이·감시 프로그램·회사 프록시가 있어서 회사 밖에서 쓴 기록도 보일 수 있어요.</span></div>
+      </div>
+      <h3>노출 단계 (네트워크 검사·PC 관리 상태)</h3>
+      <div class="lvgrid">
+        <div><b style="color:var(--ok)">1 양호</b><span>사이트 이름까지 가려지고 접속 시간 정도만 남아요.</span></div>
+        <div><b style="color:var(--accent)">2 기본</b><span>내용은 암호화돼 보호되지만, 방문한 사이트 이름은 보여요.</span></div>
+        <div><b style="color:var(--warn)">3 주의</b><span>사이트 이름과 함께 '누구인지'까지 연결되는 구조예요.</span></div>
+        <div><b style="color:var(--bad)">4 위험</b><span>회사가 내용이나 화면까지 볼 수 있는 구조예요. 이 기기에서는 개인 용무를 피하세요.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">FAQ</div>
+      <h2>자주 묻는 질문</h2>
+      <div class="faq">
+        <details class="d"><summary>내 기록이 어딘가로 전송되나요?</summary><p>아니요. 불러온 파일은 이 브라우저 안에서만 읽고 분석해요. 서버도, 만든 사람도 기록을 볼 수 없어요. 설정·선택한 네트워크·기준값만 이 브라우저에 저장되고, 브라우저의 사이트 데이터를 지우면 함께 지워져요.</p></details>
+        <details class="d"><summary>외부로 나가는 요청이 정말 하나도 없나요?</summary><p>두 가지만 있어요. ① '네트워크 검사'를 누르면 Cloudflare·tls.peet.ws·httpbin.org·ipwho.is·STUN 서버에 일반 웹 요청을 보내 연결 상태를 확인해요 (내 기록은 보내지 않아요). ② Windows 방문 기록을 해석할 때 sql.js라는 공개 도구를 jsDelivr에서 내려받아요. 둘 다 일반 웹사이트를 열 때와 같은 수준의 접속 정보만 남아요.</p></details>
+        <details class="d"><summary>회사가 실제로 이 기록을 보고 있다는 뜻인가요?</summary><p>아니요. 이 도구는 회사가 <b>볼 수 있는 구조인지</b>를 보여 줘요. 실제로 저장·열람하는지는 회사의 장비 설정과 정책에 달려 있어서 밖에서는 알 수 없어요. 그래서 "최악의 경우 이만큼 보일 수 있다"는 기준으로 이해해 주세요.</p></details>
+        <details class="d"><summary>카톡 대화나 검색어도 회사가 볼 수 있나요?</summary><p>보통은 아니에요. 요즘 서비스는 대부분 암호화돼 있어서 회사 네트워크에는 '어느 서비스에 언제 접속했는지'만 남아요. 다만 회사가 설치한 루트 인증서가 있거나, 화면 감시·정보유출방지 프로그램이 깔린 회사 PC라면 내용까지 보일 수 있어요. 이런 경우 결과 화면에 '위험'으로 표시돼요.</p></details>
+        <details class="d"><summary>회사 PC에서 Windows 스크립트를 써도 되나요?</summary><p>스크립트는 기록을 읽기만 하고 아무것도 바꾸거나 보내지 않아요. 하지만 회사 보안 프로그램이 스크립트 실행을 기록하거나 막을 수 있어요. 사내 규정이 걱정되면 개인 PC에서만 쓰세요.</p></details>
+        <details class="d"><summary>결과가 정확한가요?</summary><p>판정은 휴리스틱이라 틀릴 수 있어요. 사이트 분류는 국내외 주요 서비스 목록 기준이라, 목록에 없는 서비스는 '기타'로 나와요. iPhone은 와이파이 구분이 없어 근무시간을 기준으로 추정해요. 중요한 판단에는 참고 자료로만 써 주세요.</p></details>
+        <details class="d"><summary>위험하다고 나오면 어떻게 해야 하나요?</summary><p>가장 확실한 방법은 <b>개인 용무를 개인 폰 셀룰러(LTE·5G)로 분리</b>하는 거예요. 기기 이름에서 실명 빼기, 비공개 Wi-Fi 주소를 '순환'으로 바꾸기, 위치 권한을 '다음번에 묻기'로 바꾸기도 도움이 돼요. 각 결과 카드의 '이렇게 하세요'를 참고하세요.</p></details>
+        <details class="d"><summary>Android는 언제 되나요?</summary><p>iPhone·Windows를 먼저 다듬은 뒤 마지막 단계로 지원할 예정이에요. 지금도 '네트워크 검사' 탭은 Android 폰에서 그대로 쓸 수 있어요.</p></details>
+      </div>
+    </section>
+
+    <section class="card notice">
+      <div class="eyebrow">Notice</div>
+      <h2>안내문</h2>
+      <h3>개인정보 처리</h3>
+      <ul>
+        <li>PRIVACY GUARD는 회원가입이 없고, 어떤 개인정보도 수집·저장·전송하지 않아요.</li>
+        <li>불러온 기록 파일은 사용자의 브라우저 메모리에서만 처리되고, 페이지를 닫으면 사라져요.</li>
+        <li>근무 시간 설정, 선택한 회사 네트워크, 네트워크 검사 기준값, 직접 확인 항목의 답은 사용자의 브라우저 저장소(localStorage)에만 남아요.</li>
+        <li>네트워크 검사 시 접속하는 외부 서비스는 각 서비스의 정책에 따라 접속 IP 등 일반적인 접속 정보를 볼 수 있어요.</li>
+      </ul>
+      <h3>이용 원칙</h3>
+      <ul>
+        <li><b>본인 기기·본인 기록에만</b> 사용하세요. 다른 사람의 기기나 기록을 동의 없이 분석하는 데 쓰면 안 돼요. 타인의 통신·위치 정보를 몰래 수집하는 것은 법으로 금지돼 있어요.</li>
+        <li>회사 기기에서 사용할 때는 사내 보안 규정을 먼저 확인하세요.</li>
+        <li>이 도구는 근태 기록을 조작하거나 회사 보안 장치를 우회하는 기능을 제공하지 않아요.</li>
+      </ul>
+      <h3>책임의 한계</h3>
+      <ul>
+        <li>결과는 기술적 구조를 바탕으로 한 참고용 진단이며, 법률 자문이나 회사의 실제 열람 여부에 대한 확인이 아니에요.</li>
+        <li>회사의 개인정보 처리에 의문이 있다면 회사 개인정보보호책임자에게 열람을 요청하거나, 개인정보 침해신고센터(국번 없이 118)에서 상담할 수 있어요.</li>
+      </ul>
+      <p class="note">시안 v0.4 · 문의와 의견은 만든 사람에게 직접 전해 주세요.</p>
+    </section>
   </section>
 </main>
 
@@ -771,6 +912,7 @@ function goTab(t){
   $$("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === t ? "true" : "false"));
   $$(".pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + t));
   if(t === "adm") renderAdmin();
+  if(t === "guide"){ const g = platform === "win" ? "win" : "ios"; const btn = document.querySelector('.gtabs button[data-g="' + g + '"]'); if(btn) btn.click(); }
   window.scrollTo({top: Math.min(window.scrollY, $("nav.tabs").offsetTop)});
 }
 $$("nav.tabs button").forEach(b => b.addEventListener("click", () => goTab(b.dataset.tab)));
@@ -1333,7 +1475,7 @@ const ICON = {
 function renderOnboard(){
   const box = $("#onboard");
   if(platform === "ios"){
-    box.innerHTML = `<section class="card">
+    box.innerHTML = firstVisitHtml() + `<section class="card">
       <div class="eyebrow">iPhone</div>
       <h2>아이폰 기록으로 나의 하루 보기</h2>
       <p class="sub">아이폰이 직접 남기는 <b>앱 개인정보 보호 리포트</b>를 불러오면, 회사 와이파이에 남았을 하루를 시간순으로 보여 드려요.</p>
@@ -1350,7 +1492,7 @@ function renderOnboard(){
       <p class="note" id="fileStat"></p>
     </section>`;
   } else if(platform === "win"){
-    box.innerHTML = `<section class="card">
+    box.innerHTML = firstVisitHtml() + `<section class="card">
       <div class="eyebrow">Windows</div>
       <h2>PC 기록으로 나의 하루 보기</h2>
       <p class="sub">검사 스크립트가 이 PC의 <b>네트워크 연결 기록, 브라우저 방문 기록, 회사 관리 프로그램, 인증서·프록시 설정</b>을 모아 파일 하나로 저장해요. 그 파일을 여기서 열면 회사 네트워크에 있던 시간과 그때 남은 기록을 정확히 나눠서 보여 드려요.</p>
@@ -1434,6 +1576,17 @@ function renderSettings(){
   };
   box.querySelectorAll("input,select").forEach(i => i.addEventListener("change", upd));
 }
+
+/* ================= guide ================= */
+$$(".gtabs button").forEach(b => b.addEventListener("click", () => {
+  $$(".gtabs button").forEach(x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+  $$(".gpanel").forEach(pn => pn.classList.toggle("on", pn.id === "g-" + b.dataset.g));
+}));
+function firstVisitHtml(){
+  if(store.get("pg.fv.dismissed")) return "";
+  return `<div class="firstvisit" id="fv"><div><b>처음이신가요?</b><span>3분이면 충분해요. <button class="hlink" style="color:var(--accent);font-size:13px" data-goto="guide">사용법 보기 →</button> 또는 아래 '샘플로 미리보기'로 먼저 둘러보세요.</span></div><button class="x" id="fvX" aria-label="닫기">×</button></div>`;
+}
+document.addEventListener("click", e => { if(e.target && e.target.id === "fvX"){ store.set("pg.fv.dismissed", true); const f = $("#fv"); if(f) f.remove(); } });
 
 /* ================= company network picker (Windows) ================= */
 let netPickAll = false;
