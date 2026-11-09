@@ -127,6 +127,20 @@ input[type=time],input[type=text],select{font:inherit;font-size:15px;padding:9px
 .busybox b{display:block;font-size:16px}
 .busybox p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
 .busybox pre{text-align:left;white-space:pre-wrap;word-break:break-all;background:var(--card2);border-radius:10px;padding:10px;font-size:11.5px;max-height:160px;overflow:auto;margin:12px 0 0;color:var(--ink2)}
+.nets{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
+.net{position:relative;display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;background:var(--card)}
+.net input{position:absolute;opacity:0;pointer-events:none}
+.net .ni{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--card2);color:var(--muted);font-weight:800}
+.net .nt{flex:1;min-width:0}
+.net .nt b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.net .nt span{display:block;font-size:12px;color:var(--muted)}
+.net .ck{flex:none;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;color:transparent;font-size:13px;font-weight:900}
+.net .wb{height:4px;border-radius:2px;background:var(--line2);margin-top:5px;overflow:hidden}
+.net .wb i{display:block;height:100%;background:var(--accent)}
+.net:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.net:has(input:checked) .ni{background:var(--accent);color:#fff}
+.net:has(input:checked) .ck{background:var(--accent);border-color:var(--accent);color:#fff}
+.nethd{display:flex;align-items:flex-start;gap:10px;justify-content:space-between;flex-wrap:wrap}
 /* ---------- day (main) ---------- */
 .daychips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;margin:14px 0 2px}
 .daychips::-webkit-scrollbar{display:none}
@@ -360,6 +374,7 @@ footer p{margin:6px 0}
     <div id="dayView" class="hidden">
       <div class="setup-bar" id="setupBar"></div>
       <div id="settingsBox" class="card hidden"></div>
+      <section class="card hidden" id="netPick"></section>
       <div class="daychips" id="dayChips"></div>
       <div class="dayhero" id="dayHero"></div>
       <section class="card">
@@ -956,6 +971,7 @@ async function parseWin(j, onStep){
   const conns = [], openC = {};
   const closeAll = ts => Object.keys(openC).forEach(k => { openC[k].end = ts; conns.push(openC[k]); delete openC[k]; });
   evs.forEach(e => {
+    if((e.src === "wlan" || e.src === "netprofile") && /식별 중|identifying|네트워크 확인 중/i.test(e.name || "")) return;
     if(e.src === "wlan" || e.src === "netprofile"){
       const name = e.name || (e.src === "wlan" ? "Wi-Fi" : "유선 네트워크");
       const key = e.src + "|" + name;
@@ -965,6 +981,9 @@ async function parseWin(j, onStep){
   });
   Object.values(openC).forEach(c => { c.end = collected; c.open = true; conns.push(c); });
   // de-dup wlan + netprofile describing the same network: keep both but mark
+  // Wi-Fi is logged twice (WLAN + network profile); keep the WLAN one
+  const ssids = new Set(conns.filter(c => c.kind === "wifi").map(c => c.name));
+  for(let i = conns.length - 1; i >= 0; i--){ const c = conns[i]; if(c.kind === "net" && ssids.has(String(c.name).replace(/\s+\d+$/, ""))) conns.splice(i, 1); }
   conns.sort((a,b) => a.start - b.start);
   const power = evs.filter(e => e.src === "power").map(e => ({ts:e.ts, kind:e.kind}));
   // capability
@@ -1391,7 +1410,7 @@ function renderSetupBar(){
   const range = M.allDays.length ? M.allDays[0].slice(5).replace("-","/") + " ~ " + M.allDays[M.allDays.length-1].slice(5).replace("-","/") : "";
   $("#setupBar").innerHTML = `<span class="pill ${d.sample ? "warn" : "acc"}">${d.sample ? "샘플" : (d.platform === "win" ? "Windows" : "iPhone")}</span>
     <div class="src"><b>${esc(d.sample ? "샘플 데이터로 보는 중" : d.label)}</b>${esc(range)} · ${M.workDays.length}일 · ${M.assumed ? "근무시간 = 회사 와이파이로 가정" : "회사 네트워크: " + esc((companyNets || guessCompanyNets()).join(", ") || "선택 안 됨")}</div>
-    <button class="btn ghost sm" id="setBtn">${ICON.gear}설정</button>
+    <button class="btn ghost sm" id="setBtn">${ICON.gear}근무 시간</button>
     <label class="btn ghost sm">${ICON.file}다른 파일<input type="file" id="fileIn2" accept=".ndjson,.json,.txt"></label>`;
   $("#setBtn").onclick = () => { settingsOpen = !settingsOpen; renderSettings(); };
   bindFile($("#fileIn2"));
@@ -1401,14 +1420,7 @@ function renderSettings(){
   const box = $("#settingsBox");
   box.classList.toggle("hidden", !settingsOpen);
   if(!settingsOpen) return;
-  let netHtml = "";
-  if(DATA && DATA.platform === "win" && DATA.conns.length){
-    const tot = {}; DATA.conns.forEach(c => tot[c.name] = (tot[c.name] || 0) + (c.end - c.start));
-    const cur = companyNets || guessCompanyNets();
-    netHtml = `<div><div class="lbl">회사 네트워크 고르기</div><div class="chk" id="coNets">${Object.entries(tot).sort((a,b) => b[1]-a[1]).map(([n,ms]) => `<label><input type="checkbox" value="${esc(n)}" ${cur.includes(n) ? "checked" : ""}>${esc(n)} <small>${durTxt(ms/60000)}</small></label>`).join("")}</div><p class="note">이 네트워크에 연결돼 있던 시간의 기록만 '회사 네트워크에 보임'으로 계산해요.</p></div>`;
-  }
-  box.innerHTML = `<h2>근무·네트워크 설정</h2><div class="settings">
-    ${netHtml}
+  box.innerHTML = `<h2>근무 시간 설정</h2><div class="settings">
     <div><div class="lbl">근무 요일</div><div class="days" id="days">${[1,2,3,4,5,6,0].map(d => `<label><input type="checkbox" value="${d}" ${settings.days.includes(d) ? "checked" : ""}>${DOW[d]}</label>`).join("")}</div></div>
     <div class="grid2"><div><div class="lbl">출근</div><input type="time" id="wStart" value="${esc(settings.start)}"></div><div><div class="lbl">퇴근</div><input type="time" id="wEnd" value="${esc(settings.end)}"></div></div>
     <div class="grid2"><div><div class="lbl">점심 시작</div><input type="time" id="lStart" value="${esc(settings.lunchS)}"></div><div><div class="lbl">점심 끝</div><input type="time" id="lEnd" value="${esc(settings.lunchE)}"></div></div>
@@ -1418,10 +1430,41 @@ function renderSettings(){
   const upd = () => {
     settings = {days:$$("#days input:checked").map(i => +i.value), start:$("#wStart").value || "09:00", end:$("#wEnd").value || "18:00", kw:$("#workKw").value, buf:+$("#wBuf").value, lunchS:$("#lStart").value || "12:00", lunchE:$("#lEnd").value || "13:00"};
     store.set(SET_KEY, settings);
-    if($("#coNets")){ companyNets = $$("#coNets input:checked").map(i => i.value); if(!DATA.sample) store.set(CO_KEY, companyNets); }
     renderAll(true);
   };
   box.querySelectorAll("input,select").forEach(i => i.addEventListener("change", upd));
+}
+
+/* ================= company network picker (Windows) ================= */
+let netPickAll = false;
+function workMinutesIn(s, e){
+  let m = 0; const step = 5*60000;
+  for(let t = s.getTime(); t < e.getTime(); t += step){ const z = zone(new Date(t)); if(z === "work" || z === "lunch") m += Math.min(step, e.getTime() - t)/60000; }
+  return m;
+}
+function renderNetPick(){
+  const box = $("#netPick");
+  if(!DATA || DATA.platform !== "win" || !DATA.conns.length){ box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  const agg = {};
+  DATA.conns.forEach(c => { const o = agg[c.name] = agg[c.name] || {name:c.name, kind:c.kind, ms:0, work:0, days:new Set(), n:0}; o.ms += c.end - c.start; o.work += workMinutesIn(c.start, c.end); o.days.add(dayKey(c.start)); o.n++; });
+  const list = Object.values(agg).sort((a,b) => b.work - a.work || b.ms - a.ms);
+  const auto = !companyNets; const cur = companyNets || guessCompanyNets();
+  const shown = netPickAll ? list : list.slice(0, 6);
+  box.innerHTML = `<div class="nethd"><div><div class="eyebrow">Company network</div><h2>회사 네트워크 고르기</h2>
+      <p class="sub" style="margin:0">회사에서 쓰는 와이파이·유선을 <b>모두</b> 골라 주세요. 여러 개를 고를 수 있어요. 고른 네트워크에 연결돼 있던 시간의 기록만 '회사 네트워크에 보임'으로 계산해요.</p></div>
+      ${auto ? '<span class="pill warn">자동 선택됨 · 확인 필요</span>' : `<span class="pill acc">${cur.length}개 선택</span>`}</div>
+    <div class="nets">${shown.map(o => { const tot = o.ms/60000, wp = tot ? Math.round(o.work/tot*100) : 0;
+      return `<label class="net"><input type="checkbox" value="${esc(o.name)}" ${cur.includes(o.name) ? "checked" : ""}><span class="ni">${o.kind === "wifi" ? "≋" : "⇄"}</span><span class="nt"><b title="${esc(o.name)}">${esc(o.name)}</b><span>${o.days.size}일 · ${esc(durTxt(tot))} · 근무시간 ${wp}%</span><span class="wb"><i style="width:${wp}%"></i></span></span><span class="ck">✓</span></label>`; }).join("")}</div>
+    <div class="row" style="margin-top:10px;align-items:center">${list.length > 6 ? `<button class="btn ghost sm" id="netMore">${netPickAll ? "접기" : "네트워크 " + (list.length - 6) + "개 더 보기"}</button>` : ""}<span class="note" style="margin:0">'근무시간 %'는 그 네트워크에 연결된 시간 중 근무시간(설정 기준)에 해당하는 비율이에요. 높을수록 회사 네트워크일 가능성이 커요.</span></div>`;
+  box.querySelectorAll(".net input").forEach(inp => inp.addEventListener("change", () => {
+    const set = new Set(companyNets || guessCompanyNets());
+    inp.checked ? set.add(inp.value) : set.delete(inp.value);
+    companyNets = [...set];
+    if(!DATA.sample) store.set(CO_KEY, companyNets);
+    renderAll(true);
+  }));
+  const mb = $("#netMore"); if(mb) mb.onclick = () => { netPickAll = !netPickAll; renderNetPick(); };
 }
 
 /* ================= DAY (main) ================= */
@@ -1441,7 +1484,9 @@ function renderDayView(){
 function dayPresence(dk){
   const d0 = keyDate(dk), d1 = new Date(d0.getTime() + 86400000);
   if(M.co){
-    const segs = M.co.filter(c => c.end > d0 && c.start < d1).map(c => ({s:new Date(Math.max(c.start, d0)), e:new Date(Math.min(c.end, d1))}));
+    const raw = M.co.filter(c => c.end > d0 && c.start < d1).map(c => ({s:new Date(Math.max(c.start, d0)), e:new Date(Math.min(c.end, d1))})).sort((a,b) => a.s - b.s);
+    const segs = [];
+    raw.forEach(r => { const l = segs[segs.length - 1]; if(l && r.s <= l.e){ if(r.e > l.e) l.e = r.e; } else segs.push({s:r.s, e:r.e}); });
     if(!segs.length) return null;
     return {segs, first:segs[0].s, last:segs[segs.length-1].e, total:segs.reduce((x,s) => x + (s.e - s.s), 0)/60000, real:true};
   }
@@ -2045,7 +2090,7 @@ function renderAll(keepScroll){
   $("#onboard").innerHTML = "";
   $("#dayView").classList.remove("hidden");
   buildModel();
-  renderSetupBar(); renderSettings(); renderDayView(); renderReport();
+  renderSetupBar(); renderSettings(); renderNetPick(); renderDayView(); renderReport();
   if($("#pane-adm").classList.contains("on")) renderAdmin();
   renderBaseInfo();
 }
