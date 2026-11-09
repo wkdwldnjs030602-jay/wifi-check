@@ -114,6 +114,19 @@ input[type=time],input[type=text],select{font:inherit;font-size:15px;padding:9px
 .chk label:has(input:checked){background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .chk label:has(input:checked) small{color:rgba(255,255,255,.8)}
 
+.psfile{margin-top:10px;border:2px solid var(--warn);background:var(--warn-bg);border-radius:14px;padding:12px 14px}
+.psfile .psh{font-weight:800;color:var(--warn);font-size:14px;margin-bottom:6px}
+.psfile ol.gs{margin:0;padding-left:20px;font-size:13.5px}
+.psfile ol.gs li{margin:5px 0}
+.psfile .em{display:inline;font-size:inherit;color:var(--ink);background:linear-gradient(transparent 60%,color-mix(in srgb,var(--warn) 35%,transparent) 60%)}
+.busy{position:fixed;inset:0;z-index:60;background:rgba(9,11,20,.55);backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
+.busybox{background:var(--card);color:var(--ink);border-radius:20px;padding:24px 22px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.busyic{width:44px;height:44px;border-radius:14px;margin:0 auto 12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.busyic .spin{width:20px;height:20px}
+.busyic.err{background:var(--bad-bg);color:var(--bad);font-weight:800;font-size:22px}
+.busybox b{display:block;font-size:16px}
+.busybox p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.busybox pre{text-align:left;white-space:pre-wrap;word-break:break-all;background:var(--card2);border-radius:10px;padding:10px;font-size:11.5px;max-height:160px;overflow:auto;margin:12px 0 0;color:var(--ink2)}
 /* ---------- day (main) ---------- */
 .daychips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;margin:14px 0 2px}
 .daychips::-webkit-scrollbar{display:none}
@@ -482,6 +495,7 @@ footer p{margin:6px 0}
   <p>네트워크 검사에 쓰는 외부 서비스: Cloudflare, tls.peet.ws, httpbin.org, ipwho.is, Google·Cloudflare STUN. 브라우저 기록 해석에는 sql.js(jsDelivr)를 내려받아 이 브라우저 안에서 실행해요. 기록 파일 자체는 외부로 보내지 않아요.</p>
 </div></footer>
 <div class="tip" id="tip"></div>
+<div class="busy hidden" id="busy"><div class="busybox"><div class="busyic" id="busyIc"><span class="spin"></span></div><b id="busyT">불러오는 중</b><p id="busyM"></p><pre id="busyE" class="hidden"></pre><div class="row hidden" id="busyBtns" style="justify-content:center;margin-top:12px"><button class="btn ghost sm" id="busyCopy">오류 내용 복사</button><button class="btn sm" id="busyClose">닫기</button></div></div></div>
 
 <script type="text/plain" id="ps1src"># PRIVACY GUARD - Windows collector v1
 # Read-only. Collects what a company could see about this PC and saves ONE json file
@@ -688,6 +702,9 @@ const mins = d => d.getHours()*60 + d.getMinutes();
 const toMin = s => { const [h,m] = String(s).split(":").map(Number); return (h||0)*60 + (m||0); };
 const hm = m => pad(Math.floor(m/60)) + ":" + pad(Math.round(m)%60);
 const durTxt = m => m >= 60 ? Math.floor(m/60) + "시간" + (m%60 ? " " + Math.round(m%60) + "분" : "") : Math.round(m) + "분";
+const toDate = v => { if(v == null || v === "") return new Date(NaN); if(v instanceof Date) return v; return new Date(String(v).replace(/(\.\d{3})\d+/, "$1")); };
+const arr = x => Array.isArray(x) ? x : (x == null ? [] : [x]);
+const tick = () => new Promise(r => setTimeout(r, 30));
 const hostOf = u => { try{ return new URL(u).hostname.toLowerCase(); }catch(e){ return ""; } };
 
 /* tooltip */
@@ -852,18 +869,24 @@ function loadSql(){
     s.onload = () => window.initSqlJs({locateFile: f => base + f}).then(res, rej);
     s.onerror = () => rej(new Error("sql.js를 불러오지 못했어요"));
     document.head.appendChild(s);
+    setTimeout(() => rej(new Error("sql.js 내려받기 시간 초과 (회사 네트워크가 cdn.jsdelivr.net을 막았을 수 있어요)")), 25000);
   });
+  sqlPromise.catch(() => { sqlPromise = null; });
   return sqlPromise;
 }
 function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
 
 async function parseWin(j, onStep){
-  const collected = j.collectedAt ? new Date(j.collectedAt) : new Date();
+  ["events","certs","software","services","processes","browserPolicies","capability","dnsCache","browsers","visits"].forEach(k => { j[k] = arr(j[k]); });
+  if(j.computer) j.computer.mdm = arr(j.computer.mdm);
+  if(j.network) j.network.current = arr(j.network.current);
+  j.browserPolicies.forEach(p => { p.keys = arr(p.keys); p.forcedExtensions = arr(p.forcedExtensions); });
+  let collected = j.collectedAt ? toDate(j.collectedAt) : new Date(); if(isNaN(collected)) collected = new Date();
   const since = collected.getTime() - (j.days || 14) * 86400000;
   const net = [], notes = [];
   // browser visits
   const visits = [];
-  if(Array.isArray(j.visits)) j.visits.forEach(v => visits.push({ts:new Date(v.t), url:v.url, browser:v.browser || "Chrome"}));
+  if(Array.isArray(j.visits)) j.visits.forEach(v => visits.push({ts:toDate(v.t), url:String(v.url || ""), browser:v.browser || "Chrome"}));
   const dbs = (j.browsers || []).filter(b => b.db);
   (j.browsers || []).filter(b => b.error).forEach(b => notes.push(b.name + " (" + b.profile + "): " + (b.error === "too large" ? "기록 파일이 너무 커서 건너뜀" : "브라우저가 파일을 잠가서 못 읽음 — 브라우저를 닫고 다시 실행하세요")));
   if(dbs.length){
@@ -871,7 +894,7 @@ async function parseWin(j, onStep){
     try{
       const SQL = await loadSql();
       for(const b of dbs){
-        onStep && onStep(b.name + " 기록 읽는 중…");
+        onStep && onStep(b.name + " 방문 기록 읽는 중…"); await tick();
         try{
           const db = new SQL.Database(b64ToBytes(b.db));
           const minT = (since + 11644473600000) * 1000;
@@ -897,7 +920,7 @@ async function parseWin(j, onStep){
     lastBy[k] = ev; net.push(ev);
   });
   // connections
-  const evs = (j.events || []).map(e => ({...e, ts:new Date(e.t)})).filter(e => !isNaN(e.ts)).sort((a,b) => a.ts - b.ts);
+  const evs = (j.events || []).map(e => ({...e, ts:toDate(e.t)})).filter(e => !isNaN(e.ts)).sort((a,b) => a.ts - b.ts);
   const conns = [], openC = {};
   const closeAll = ts => Object.keys(openC).forEach(k => { openC[k].end = ts; conns.push(openC[k]); delete openC[k]; });
   evs.forEach(e => {
@@ -913,7 +936,7 @@ async function parseWin(j, onStep){
   conns.sort((a,b) => a.start - b.start);
   const power = evs.filter(e => e.src === "power").map(e => ({ts:e.ts, kind:e.kind}));
   // capability
-  const acc = (j.capability || []).map(c => { const s = c.lastStart ? new Date(c.lastStart) : null; const e = c.lastStop ? new Date(c.lastStop) : s; return s && !isNaN(s) ? {appId:c.app, app:appName(c.app), cat:c.type, start:s, end:(e && !isNaN(e) && e > s) ? e : s, lastOnly:true} : null; }).filter(Boolean).sort((a,b) => a.start - b.start);
+  const acc = (j.capability || []).map(c => { const s = c.lastStart ? toDate(c.lastStart) : null; const e = c.lastStop ? toDate(c.lastStop) : s; return s && !isNaN(s) ? {appId:c.app, app:appName(c.app), cat:c.type, start:s, end:(e && !isNaN(e) && e > s) ? e : s, lastOnly:true} : null; }).filter(Boolean).sort((a,b) => a.start - b.start);
   return {platform:"win", acc, net, conns, power, pc:analyzePC(j), dns:j.dnsCache || [], notes, collected, raw:{computer:j.computer || {}, network:j.network || {}}, bad:0, total:net.length};
 }
 
@@ -950,9 +973,9 @@ const CERT_PUBLIC = /microsoft|digicert|globalsign|sectigo|comodo|usertrust|entr
 function analyzePC(j){
   const c = j.computer || {}, n = j.network || {};
   const hay = [];
-  (j.software || []).forEach(s => hay.push({src:"설치된 프로그램", name:s.name, pub:s.publisher || ""}));
-  (j.services || []).forEach(s => hay.push({src:"실행 중인 서비스", name:s.display || s.name, pub:s.name}));
-  (j.processes || []).forEach(p => hay.push({src:"실행 중인 프로세스", name:p, pub:""}));
+  (j.software || []).forEach(s => s && s.name && hay.push({src:"설치된 프로그램", name:String(s.name), pub:String(s.publisher || "")}));
+  (j.services || []).forEach(s => s && hay.push({src:"실행 중인 서비스", name:String(s.display || s.name || ""), pub:String(s.name || "")}));
+  (j.processes || []).forEach(p => p && hay.push({src:"실행 중인 프로세스", name:String(typeof p === "object" ? (p.name || p.ProcessName || "") : p), pub:""}));
   const agents = {}, seen = new Set();
   hay.forEach(h => {
     const text = h.name + " " + h.pub;
@@ -1191,41 +1214,59 @@ function setData(d, label, sample){
   DATASETS[d.platform] = d;
   if(d.platform === "win" && !sample){ companyNets = store.get(CO_KEY) || null; }
   if(d.platform === "win" && sample){ companyNets = ["OFFICE-5G"]; }
-  if(platform !== d.platform){ setPlatform(d.platform); return; }
-  DATA = d; storyDay = null;
-  if(d.platform === "win") renderManual();
-  renderAll();
+  if(platform !== d.platform){ setPlatform(d.platform); }
+  else { DATA = d; storyDay = null; if(d.platform === "win") renderManual(); renderAll(); }
+  goTab("day");
   window.scrollTo({top: $("nav.tabs").offsetTop, behavior:"smooth"});
 }
-function readFile(file, onText){
-  if(file.size > 400 * 1024 * 1024){ alert("파일이 너무 커요 (400MB 초과)."); return; }
-  const rd = new FileReader();
-  rd.onload = () => onText(String(rd.result || ""));
-  rd.onerror = () => alert("파일을 읽지 못했어요.");
-  rd.readAsText(file);
+const busy = {
+  show(t, m){ $("#busy").classList.remove("hidden"); $("#busyIc").className = "busyic"; $("#busyIc").innerHTML = '<span class="spin"></span>'; $("#busyT").textContent = t; $("#busyM").textContent = m || ""; $("#busyE").classList.add("hidden"); $("#busyBtns").classList.add("hidden"); },
+  step(m){ $("#busyM").textContent = m; },
+  hide(){ $("#busy").classList.add("hidden"); },
+  error(t, m, detail){ $("#busy").classList.remove("hidden"); $("#busyIc").className = "busyic err"; $("#busyIc").textContent = "!"; $("#busyT").textContent = t; $("#busyM").textContent = m || "";
+    if(detail){ $("#busyE").textContent = detail; $("#busyE").classList.remove("hidden"); } else $("#busyE").classList.add("hidden");
+    $("#busyBtns").classList.remove("hidden"); }
+};
+$("#busyClose").onclick = () => busy.hide();
+$("#busyCopy").onclick = () => { const t = $("#busyT").textContent + "\n" + $("#busyM").textContent + "\n" + $("#busyE").textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => $("#busyCopy").textContent = "복사됨").catch(() => {}); };
+function readFile(file){
+  return new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(String(rd.result || "")); rd.onerror = () => rej(rd.error || new Error("파일을 읽지 못했어요")); rd.readAsText(file); });
 }
-function handleFile(file, statusEl){
-  const say = t => { if(statusEl) statusEl.textContent = t; };
-  say("읽는 중…");
-  readFile(file, async text => {
-    const t = text.replace(/^﻿/,"").trim();
-    if(t.startsWith("{") && /PrivacyGuard-Windows/.test(t.slice(0, 200))){
-      try{
-        const j = JSON.parse(t);
-        const d = await parseWin(j, say);
-        if(!d.net.length && !d.conns.length && !d.pc) { say("기록을 찾지 못했어요."); return; }
-        say(""); setData(d, file.name, false);
-      }catch(e){ say("Windows 결과 파일을 해석하지 못했어요: " + (e.message || e)); }
+async function handleFile(file){
+  const mb = (file.size / 1048576).toFixed(1);
+  let stage = "파일 읽기";
+  busy.show("기록 파일 불러오는 중", file.name + " · " + mb + "MB"); await tick();
+  try{
+    if(file.size > 400 * 1024 * 1024) throw new Error("파일이 너무 커요 (" + mb + "MB). 400MB 이하만 열 수 있어요.");
+    const text = await readFile(file);
+    const t = text.replace(/^\uFEFF/,"").trim();
+    let j = null;
+    if(t.startsWith("{")){ stage = "JSON 해석"; busy.step("파일 구조 확인 중…"); await tick(); j = JSON.parse(t); }
+    if(j && (j.tool === "PrivacyGuard-Windows" || j.events || j.computer)){
+      stage = "Windows 기록 분석";
+      const d = await parseWin(j, m => busy.step(m));
+      if(!d.net.length && !d.conns.length && !d.pc) throw new Error("파일 안에서 기록을 찾지 못했어요.");
+      stage = "화면 그리기"; busy.step("하루를 재구성하는 중…"); await tick();
+      setData(d, file.name, false);
+      busy.hide();
       return;
     }
+    stage = "iPhone 리포트 분석"; busy.step("iPhone 리포트 분석 중…"); await tick();
     const d = parseIOS(t);
-    if(!d.acc.length && !d.net.length){ say("이 파일에서 기록을 찾지 못했어요. iPhone은 '앱 활동 저장'으로 받은 .ndjson, Windows는 검사 스크립트가 만든 .json 파일이에요."); return; }
-    say(""); setData(d, file.name, false);
-  });
+    if(!d.acc.length && !d.net.length) throw new Error("이 파일에서 기록을 찾지 못했어요. iPhone은 '앱 활동 저장'으로 받은 .ndjson, Windows는 검사 스크립트가 만든 PrivacyGuard_result_….json 파일이에요.");
+    stage = "화면 그리기"; setData(d, file.name, false);
+    busy.hide();
+  }catch(e){
+    console.error(e);
+    busy.error("불러오지 못했어요", "단계: " + stage + " — " + (e && e.message || e), String(e && e.stack || e).split("\n").slice(0, 4).join("\n") + "\n파일: " + file.name + " (" + mb + "MB) · " + navigator.userAgent);
+  }
 }
+function bindFile(input){ if(!input) return; input.addEventListener("change", e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if(f) handleFile(f); }); }
 async function loadSample(p){
-  if(p === "win"){ const d = await parseWin(makeSampleWin()); setData(d, "샘플 데이터", true); }
-  else setData(parseIOS(makeSampleIOS()), "샘플 데이터", true);
+  try{
+    if(p === "win"){ const d = await parseWin(makeSampleWin()); setData(d, "샘플 데이터", true); }
+    else setData(parseIOS(makeSampleIOS()), "샘플 데이터", true);
+  }catch(e){ console.error(e); busy.error("샘플을 불러오지 못했어요", String(e && e.message || e), String(e && e.stack || "")); }
 }
 
 /* ================= onboarding ================= */
@@ -1263,7 +1304,7 @@ function renderOnboard(){
       <p class="sub">검사 스크립트가 이 PC의 <b>네트워크 연결 기록, 브라우저 방문 기록, 회사 관리 프로그램, 인증서·프록시 설정</b>을 모아 파일 하나로 저장해요. 그 파일을 여기서 열면 회사 네트워크에 있던 시간과 그때 남은 기록을 정확히 나눠서 보여 드려요.</p>
       <ol class="steps">
         <li><div><b>검사 스크립트 복사하기</b><span class="d">읽기만 하는 스크립트예요. 관리자 권한이 필요 없고, 인터넷으로 아무것도 보내지 않아요.</span>
-          <div class="row" style="margin-top:10px"><button class="btn sm" id="copyPs">${ICON.copy}스크립트 복사</button><button class="btn ghost sm" id="dlPs">${ICON.dl}.ps1 파일로 받기</button></div>
+          <div class="row" style="margin-top:10px"><button class="btn sm" id="copyPs">${ICON.copy}스크립트 복사</button><button class="btn ghost sm" id="dlPs">${ICON.dl}.ps1 파일로 받기 (다운로드 폴더에 저장)</button></div>
           <details class="guide" style="margin:10px 0 0"><summary>무엇을 수집하나요?</summary><ol class="gs">
             <li>최근 14일 와이파이·유선 연결/해제 시각과 네트워크 이름, PC 켜짐·절전 시각</li>
             <li>Chrome·Edge·Whale·Brave 방문 기록 파일 (분석은 이 페이지에서만)</li>
@@ -1274,7 +1315,15 @@ function renderOnboard(){
             <div class="codebox" id="psPreview"></div></details></div></li>
         <li><div><b>PowerShell 열기</b><span class="d">키보드 <span class="kbd">Win</span> + <span class="kbd">X</span> → <b>터미널</b> 또는 <b>Windows PowerShell</b>을 눌러요. (관리자 아님)</span></div></li>
         <li><div><b>붙여넣고 Enter</b><span class="d">창 안에서 마우스 <b>오른쪽 클릭</b>(또는 <span class="kbd">Ctrl</span>+<span class="kbd">V</span>)으로 붙여넣고 <span class="kbd">Enter</span>. 여러 줄 붙여넣기 경고가 뜨면 <b>그래도 붙여넣기</b>를 눌러요. 1분 안에 끝나요.</span>
-          <details class="guide" style="margin:10px 0 0"><summary>.ps1 파일로 받았다면</summary><p class="why">PowerShell에 아래 명령을 붙여넣고 Enter. 파일을 다운로드 폴더에 받았다고 가정했어요.</p><div class="codebox">powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\\Downloads\\PrivacyGuard-Windows.ps1"</div></details></div></li>
+          <div class="psfile"><div class="psh">.ps1 파일로 받았다면 — 꼭 지켜 주세요</div>
+            <ol class="gs">
+              <li>파일을 <b class="em">다운로드 폴더에 그대로 두세요.</b> 바탕화면 등 다른 곳으로 옮기면 아래 명령이 파일을 찾지 못해요.</li>
+              <li>파일 이름이 <b class="em">PrivacyGuard-Windows.ps1</b> 그대로인지 확인하세요. 여러 번 받으면 <code>(1)</code>이 붙어요. 그 파일은 지우고 원래 이름만 남겨 두세요.</li>
+              <li>아래 명령을 <b class="em">한 줄 통째로</b> 복사해 PowerShell에 붙여넣고 Enter. 따옴표 안 경로만 넣으면 경로가 화면에 다시 찍히기만 하고 실행되지 않아요.</li>
+            </ol>
+            <div class="codebox" id="psCmd">powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\\Downloads\\PrivacyGuard-Windows.ps1"</div>
+            <div class="row" style="margin-top:8px"><button class="btn sm" id="copyCmd">${ICON.copy}명령 복사</button></div>
+            <p class="gtip">정상이면 <code>[PrivacyGuard] …</code> 줄이 차례로 나오고, 마지막에 <code>Done. Saved:</code>와 저장 위치가 보여요.</p></div></div></li>
         <li><div><b>결과 파일 열기</b><span class="d">바탕화면에 <code>PrivacyGuard_result_날짜.json</code>이 생겨요. 아래 버튼으로 골라요.</span></div></li>
       </ol>
       <div class="banner warn" style="margin-top:14px"><div class="bi" style="font-size:22px">!</div><div><b>회사 PC라면 먼저 읽어 주세요</b><span>스크립트는 읽기만 하지만, 회사 보안 프로그램이 실행 사실을 기록하거나 막을 수 있어요. 사내 규정이 걱정되면 개인 PC에서만 쓰세요. 브라우저를 모두 닫고 실행하면 방문 기록을 더 확실히 읽어요.</span></div></div>
@@ -1287,9 +1336,10 @@ function renderOnboard(){
     const src = $("#ps1src").textContent.trim();
     $("#psPreview").textContent = src;
     $("#copyPs").onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(src) : Promise.reject()).then(() => { $("#copyPs").innerHTML = ICON.copy + "복사됨"; setTimeout(() => $("#copyPs").innerHTML = ICON.copy + "스크립트 복사", 1800); }).catch(() => { $("#psPreview").closest("details").open = true; alert("자동 복사가 안 돼요. 아래 상자의 내용을 직접 선택해 복사해 주세요."); }); };
+    $("#copyCmd").onclick = () => { const t = $("#psCmd").textContent.trim(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $("#copyCmd").innerHTML = ICON.copy + "복사됨"; setTimeout(() => $("#copyCmd").innerHTML = ICON.copy + "명령 복사", 1800); }).catch(() => alert(t)); };
     $("#dlPs").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([src.replace(/\n/g, "\r\n")], {type:"text/plain"})); a.download = "PrivacyGuard-Windows.ps1"; document.body.appendChild(a); a.click(); a.remove(); };
   }
-  const fi = $("#fileIn"); if(fi) fi.addEventListener("change", e => { const f = e.target.files && e.target.files[0]; if(f) handleFile(f, $("#fileStat")); });
+  bindFile($("#fileIn"));
   const sb = $("#sampleBtn"); if(sb) sb.addEventListener("click", () => loadSample(platform));
 }
 function renderAndroid(){
@@ -1311,7 +1361,7 @@ function renderSetupBar(){
     <button class="btn ghost sm" id="setBtn">${ICON.gear}설정</button>
     <label class="btn ghost sm">${ICON.file}다른 파일<input type="file" id="fileIn2" accept=".ndjson,.json,.txt"></label>`;
   $("#setBtn").onclick = () => { settingsOpen = !settingsOpen; renderSettings(); };
-  $("#fileIn2").addEventListener("change", e => { const f = e.target.files && e.target.files[0]; if(f) handleFile(f, null); });
+  bindFile($("#fileIn2"));
   if(d.notes && d.notes.length) $("#setupBar").insertAdjacentHTML("beforeend", `<div class="note" style="flex-basis:100%;margin:0">${d.notes.map(esc).join("<br>")}</div>`);
 }
 function renderSettings(){
