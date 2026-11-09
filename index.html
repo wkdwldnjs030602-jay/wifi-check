@@ -141,6 +141,44 @@ table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;whi
 .hb .tr i.s{background:var(--warn)}
 .hb .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
 .dom{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
+.banner.bad{background:var(--bad-bg)} .banner.warn{background:var(--warn-bg)} .banner.ok{background:var(--ok-bg)} .banner.info{background:var(--info-bg)}
+.banner .bi{font-size:26px;font-weight:800;line-height:1}
+.banner.bad .bi{color:var(--bad)} .banner.warn .bi{color:var(--warn)} .banner.ok .bi{color:var(--ok)} .banner.info .bi{color:var(--info)}
+.banner b{display:block;font-size:15px} .banner span{font-size:13px;color:var(--muted)}
+.kgroup{margin-top:14px}
+.kgroup>.kh{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.kgroup>.kh{flex-wrap:wrap;row-gap:0}.kgroup>.kh small{font-weight:500;color:var(--muted);font-size:12px;flex-basis:100%}
+.kgroup.g1>.kh{border-color:var(--bad)} .kgroup.g2>.kh{border-color:var(--warn)} .kgroup.g3>.kh{border-color:var(--info)} .kgroup.g4>.kh{border-color:var(--ok)}
+.rlegend{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.rcard{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.rcard>summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:flex-start}
+.rcard>summary b{display:block;font-size:15px}
+.rcard>summary span.s{display:block;font-size:12.5px;color:var(--muted)}
+.rcard .ex{display:grid;gap:6px;margin-top:10px;font-size:13.5px}
+.rcard .ex div{display:grid;grid-template-columns:104px 1fr;gap:8px}
+.rcard .ex .lb{font-size:12px;font-weight:700;color:var(--muted);padding-top:1px}
+.rcard .sites{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px;font-size:13px}
+.rcard .sites div{display:flex;justify-content:space-between;gap:8px;padding:4px 0}
+.rcard .sites .tms{color:var(--muted);font-size:12px;text-align:right}
+.rcard .tipb{margin-top:8px;font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.rcard .tipb::before{content:"이렇게 하세요  ";font-weight:700;color:var(--accent)}
+.daychips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.daychips button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+.daychips button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.daychips button i{font-style:normal;color:var(--bad);font-weight:800;margin-left:3px}
+.daychips button.on i{color:inherit}
+ul.story{list-style:none;margin:0;padding:0 0 0 4px;border-left:2px solid var(--line)}
+ul.story li{position:relative;padding:6px 0 6px 14px;font-size:13.5px;display:flex;gap:8px;align-items:baseline}
+ul.story li::before{content:"";position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--line)}
+ul.story li.r3::before{border-color:var(--bad);background:var(--bad)} ul.story li.r2::before{border-color:var(--warn);background:var(--warn)}
+ul.story li.mk::before{border-color:var(--accent);background:var(--accent)}
+ul.story .tm{min-width:84px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:12.5px}
+ul.story .tx{flex:1}
+ul.story .tx small{display:block;color:var(--muted);font-size:12px}
+.zones{display:grid;gap:6px;margin-top:12px;font-size:13px}
+.zones div{display:flex;gap:8px;align-items:flex-start}
+.zones .pill{min-width:92px;text-align:center}
 /* admin console */
 .console{background:var(--console);color:var(--console-ink);border-radius:12px;padding:12px;margin-top:14px;font-size:12.5px}
 .console .hd{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--console-line);padding-bottom:8px;margin-bottom:8px}
@@ -166,7 +204,7 @@ table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;whi
 <body>
 <div class="wrap">
   <header>
-    <span class="tag">PRIVACY GUARD · 시안 v0.2</span>
+    <span class="tag">PRIVACY GUARD · 시안 v0.3</span>
     <h1>와이파이 노출 진단</h1>
     <p>지금 네트워크와 내 폰 기록을 바탕으로 회사가 무엇을 볼 수 있는지 점검해요. 모든 처리는 이 브라우저 안에서만 이뤄지고, 어떤 기록도 밖으로 보내지 않아요.</p>
   </header>
@@ -244,6 +282,10 @@ table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;whi
           <div><div class="lbl">출근</div><input type="time" id="wStart" value="09:00"></div>
           <div><div class="lbl">퇴근</div><input type="time" id="wEnd" value="18:00"></div>
         </div>
+        <div class="row2">
+          <div><div class="lbl">점심 시작</div><input type="time" id="lStart" value="12:00"></div>
+          <div><div class="lbl">점심 끝</div><input type="time" id="lEnd" value="13:00"></div>
+        </div>
         <div><div class="lbl">출퇴근 여유 시간</div><select id="wBuf" style="font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%"><option value="0">없음</option><option value="15">앞뒤 15분</option><option value="30">앞뒤 30분</option><option value="60">앞뒤 60분</option></select><p class="note">출근 체크(예: 08:52)·퇴근 체크(예: 18:05)처럼 근무시간 경계 근처 기록은 '출퇴근 시간대'로 따로 분류해요. 회사에 머무는 시간 계산에도 써요.</p></div>
         <div><div class="lbl">업무용 앱 찾을 단어</div><input type="text" id="workKw" value="mailplug" placeholder="예: mailplug, flex, slack"><p class="note">앱 ID에 이 단어가 들어 있으면 업무용 앱으로 보고 따로 분석해요. 쉼표로 여러 개 입력할 수 있어요.</p></div>
       </div>
@@ -257,13 +299,39 @@ table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;whi
     <div id="repOut" class="hidden">
       <section class="card">
         <h2>한눈에 보기</h2>
+        <div class="banner" id="banner"></div>
         <div class="stats" id="stats"></div>
         <p class="note" id="periodNote"></p>
       </section>
 
       <section class="card">
+        <h2>회사가 알 수 있는 것</h2>
+        <p class="note" style="margin:0 0 4px" id="knowBasis"></p>
+        <div id="know"></div>
+      </section>
+
+      <section class="card">
+        <h2>위험도별 접속 정리</h2>
+        <p class="note" style="margin:0 0 10px">근무시간에 회사 와이파이로 접속했을 기록을 종류별로 묶었어요. 위험도는 <b>회사가 알았을 때 불이익이나 오해로 이어질 수 있는 정도</b>예요.</p>
+        <div class="rlegend"><span class="pill bad">높음</span> 알려지면 곤란 <span class="pill warn">중간</span> 근무 태만으로 보일 수 있음 <span class="pill info">낮음</span> 일상적 사용</div>
+        <div id="riskCards"></div>
+      </section>
+
+      <section class="card">
+        <h2>회사 와이파이로 본 나의 하루</h2>
+        <p class="note" style="margin:0 0 8px">회사 장비에 남은 기록만으로 하루를 재구성하면 이렇게 보여요. 날짜를 골라 보세요.</p>
+        <div class="daychips" id="dayChips"></div>
+        <ul class="story" id="story"></ul>
+      </section>
+
+      <section class="card">
         <h2>위치 접근 분석</h2>
         <div id="locWork"></div>
+        <div class="zones">
+          <div><span class="pill ok">출퇴근 시간대</span><span>출퇴근 체크로 보이는 기록이에요. <b>회사가 알아요.</b> 체크 순간의 위치가 근태 기록에 남아요.</span></div>
+          <div><span class="pill info">근무시간·점심</span><span>앱을 열었을 때의 기록이에요. 위치가 회사 서버로 전송됐는지는 <b>확인할 수 없어요.</b></span></div>
+          <div><span class="pill warn">근무 외</span><span>퇴근 후·휴일 기록이에요. 집 근처 위치일 수 있어서 <b>가장 민감해요.</b> 위치 권한을 '다음번에 묻기'로 바꾸면 막을 수 있어요.</span></div>
+        </div>
         <h3>시간대별 위치 접근</h3>
         <div class="seg" style="grid-template-columns:1fr 1fr" id="heatSel">
           <label><input type="radio" name="hsel" value="work" checked>업무용 앱만</label>
@@ -274,29 +342,15 @@ table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;whi
         <div class="cap" id="heatCap">칸을 누르면 그 시간에 위치에 접근한 앱이 보여요.</div>
         <h3>앱별 위치 접근</h3>
         <table class="t" id="locTable"></table>
+        <p class="note">업무용 앱이 아닌 앱의 위치 접근은 폰 안에서 일어난 일이라 회사는 알 수 없어요.</p>
       </section>
 
       <section class="card">
-        <h2>업무시간 통신 — 회사 와이파이에 남았을 기록</h2>
-        <p class="note" style="margin:0 0 8px">리포트에는 와이파이·셀룰러 구분이 없어요. 그래서 <b>근무 시간 = 회사 와이파이 사용</b>으로 가정하고 계산했어요.</p>
-        <div id="catBars"></div>
-        <h3>회사가 보면 곤란할 수 있는 접속</h3>
-        <div id="sensList"></div>
-      </section>
-
-      <section class="card">
-        <h2>업무용 앱이 통신한 곳</h2>
-        <div id="workNet"></div>
-      </section>
-
-      <section class="card">
-        <h2>다른 민감 권한 접근</h2>
-        <div id="otherAcc"></div>
-      </section>
-
-      <section class="card">
-        <h2>광고·추적 서버에 가장 많이 보낸 앱</h2>
-        <div id="trackers"></div>
+        <h2>상세 데이터</h2>
+        <details class="d"><summary>근무시간 통신 비중 <span class="pill info">요청 수</span></summary><div id="catBars" style="margin-top:8px"></div></details>
+        <details class="d"><summary>업무용 앱이 통신한 곳</summary><div id="workNet" style="margin-top:8px"></div></details>
+        <details class="d"><summary>다른 민감 권한 접근</summary><div id="otherAcc" style="margin-top:8px"></div></details>
+        <details class="d"><summary>광고·추적 서버에 가장 많이 보낸 앱</summary><div id="trackers" style="margin-top:8px"></div></details>
       </section>
     </div>
   </div>
@@ -522,7 +576,7 @@ function renderManual(){
   $("#manual").querySelectorAll("input").forEach(inp => inp.addEventListener("change", e => {
     manual[e.target.name.slice(2)] = e.target.value;
     store.set(MAN_KEY, manual);
-    if(lastAuto) renderNet();
+    if(lastAuto) renderNet(); else if(report) analyzeAndRenderReport();
   }));
 }
 
@@ -708,6 +762,7 @@ function renderNet(){
       <div class="explain">자주 차단되는 사이트의 아이콘을 불러와 봤어요. 셀룰러에선 열리는데 여기서만 막히면 회사가 접속 기록을 보고 차단 정책을 적용하는 거예요.</div>
       ${kv(Object.fromEntries(Object.entries(a.probes.results).map(([k,v]) => [k, v ? "열림" : "응답 없음"])))}</details>`;
   $("#detailCard").classList.remove("hidden");
+  if(report) analyzeAndRenderReport();
   $("#copy").onclick = () => {
     const txt = ["[와이파이 노출 진단] " + new Date().toLocaleString("ko-KR"), "노출 " + r.lv + "단계 · " + t + (r.provisional ? " (잠정)" : ""), ...r.f.map(x => "- " + x.title + " — " + x.sub)].join("\n");
     (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { $("#copy").textContent = "복사됨"; setTimeout(() => $("#copy").textContent = "결과 요약 복사", 1500); }).catch(() => alert(txt));
@@ -745,7 +800,7 @@ const CATS = [
   {k:"date", label:"데이팅", sens:3, d:["tinder.com","gotinder.com","bumble.com","hinge.co","glam.am","wippy.co.kr","noondate.com"]},
   {k:"fin", label:"금융·투자", sens:2, d:["toss.im","tossinvest.com","tossbank.com","kakaobank.com","kakaopay.com","kbstar.com","kbsec.com","shinhan.com","shinhansec.com","wooribank.com","hanabank.com","kebhana.com","ibk.co.kr","nonghyup.com","kiwoom.com","samsungpop.com","miraeasset.com","nhqv.com","upbit.com","bithumb.com","coinone.co.kr","kbanknow.com","banksalad.com"]},
   {k:"video", label:"동영상·스트리밍", sens:1, d:["youtube.com","googlevideo.com","ytimg.com","youtu.be","netflix.com","nflxvideo.net","nflxso.net","twitch.tv","ttvnw.net","jtvnw.net","chzzk.naver.com","sooplive.co.kr","afreecatv.com","tving.com","wavve.com","coupangplay.com","disneyplus.com","watcha.com","laftel.net","spotify.com","scdn.co","melon.com","genie.co.kr"]},
-  {k:"game", label:"게임", sens:1, d:["steampowered.com","steamcommunity.com","steamstatic.com","riotgames.com","leagueoflegends.com","nexon.com","ncsoft.com","netmarble.com","krafton.com","pubg.com","supercell.com","epicgames.com","playstation.com","xboxlive.com","hoyoverse.com","mihoyo.com","roblox.com"]},
+  {k:"game", label:"게임", sens:1, d:["clashroyaleapp.com","steampowered.com","steamcommunity.com","steamstatic.com","riotgames.com","leagueoflegends.com","nexon.com","ncsoft.com","netmarble.com","krafton.com","pubg.com","supercell.com","epicgames.com","playstation.com","xboxlive.com","hoyoverse.com","mihoyo.com","roblox.com"]},
   {k:"shop", label:"쇼핑·배달", sens:1, d:["coupang.com","coupangcdn.com","11st.co.kr","gmarket.co.kr","auction.co.kr","ssg.com","musinsa.com","kream.co.kr","29cm.co.kr","ably.co.kr","zigzag.kr","aliexpress.com","temu.com","shopping.naver.com","smartstore.naver.com","baemin.com","woowahan.com","yogiyo.co.kr","coupangeats.com","daangn.com","bunjang.co.kr","joongna.com"]},
   {k:"sns", label:"SNS", sens:1, d:["instagram.com","cdninstagram.com","facebook.com","fbcdn.net","threads.net","twitter.com","x.com","twimg.com","tiktok.com","tiktokcdn.com","tiktokv.com","byteoversea.com","band.us","pinterest.com","reddit.com","everytime.kr","dcinside.com","fmkorea.com","theqoo.net","ruliweb.com","clien.net"]},
   {k:"msg", label:"메신저", sens:0, d:["kakao.com","kakaocdn.net","kakao.co.kr","daumcdn.net","line.me","line-apps.com","telegram.org","t.me","whatsapp.net","whatsapp.com","discord.com","discord.gg","discordapp.com","discordapp.net","signal.org","messenger.com"]},
@@ -774,7 +829,7 @@ const APP_NAMES = {
   "com.netflix.Netflix":"넷플릭스","com.spotify.client":"Spotify","com.vivarepublica.toss":"토스","com.linkedin.LinkedIn":"LinkedIn",
   "com.tinyspeck.chatlyio":"Slack","com.microsoft.skype.teams":"Teams","com.microsoft.Office.Outlook":"Outlook","com.apple.weather":"날씨",
   "com.apple.camera":"카메라","com.apple.mobileslideshow":"사진","com.apple.MobileSMS":"메시지","com.apple.mobilemail":"Mail",
-  "com.coupang.Coupang":"쿠팡","com.mailplug.workspace":"메일플러그 (샘플)","com.sample.weather":"날씨 앱 (샘플)","com.sample.naviapp":"지도 앱 (샘플)"
+  "com.coupang.Coupang":"쿠팡","com.supercell.clashroyale":"클래시 로얄","com.mailplug.workspace":"메일플러그 (샘플)","com.sample.weather":"날씨 앱 (샘플)","com.sample.naviapp":"지도 앱 (샘플)"
 };
 function appName(b){
   if(!b) return "알 수 없음";
@@ -784,25 +839,25 @@ function appName(b){
 const ACC_LABEL = {location:"위치", camera:"카메라", microphone:"마이크", contacts:"연락처", photos:"사진", mediaLibrary:"미디어 보관함", screenRecording:"화면 녹화", calendar:"캘린더", calendars:"캘린더", reminders:"미리 알림", bluetooth:"블루투스", motion:"동작·피트니스", health:"건강"};
 
 /* settings */
-const DEF_SET = {days:[1,2,3,4,5], start:"09:00", end:"18:00", kw:"mailplug", buf:30};
+const DEF_SET = {days:[1,2,3,4,5], start:"09:00", end:"18:00", kw:"mailplug", buf:30, lunchS:"12:00", lunchE:"13:00"};
 let settings = Object.assign({}, DEF_SET, store.get(SET_KEY) || {});
 function renderSettings(){
   $("#days").innerHTML = [1,2,3,4,5,6,0].map(d => `<label><input type="checkbox" value="${d}" ${settings.days.includes(d) ? "checked" : ""}>${DOW[d]}</label>`).join("");
-  $("#wStart").value = settings.start; $("#wEnd").value = settings.end; $("#workKw").value = settings.kw; $("#wBuf").value = String(settings.buf ?? 30);
+  $("#wStart").value = settings.start; $("#wEnd").value = settings.end; $("#workKw").value = settings.kw; $("#wBuf").value = String(settings.buf ?? 30); $("#lStart").value = settings.lunchS || "12:00"; $("#lEnd").value = settings.lunchE || "13:00";
   const upd = () => {
-    settings = {days:[...$("#days").querySelectorAll("input:checked")].map(i => +i.value), start:$("#wStart").value || "09:00", end:$("#wEnd").value || "18:00", kw:$("#workKw").value, buf:+$("#wBuf").value};
+    settings = {days:[...$("#days").querySelectorAll("input:checked")].map(i => +i.value), start:$("#wStart").value || "09:00", end:$("#wEnd").value || "18:00", kw:$("#workKw").value, buf:+$("#wBuf").value, lunchS:$("#lStart").value || "12:00", lunchE:$("#lEnd").value || "13:00"};
     store.set(SET_KEY, settings);
     if(report) analyzeAndRenderReport();
   };
   $("#days").querySelectorAll("input").forEach(i => i.addEventListener("change", upd));
-  ["#wStart","#wEnd","#workKw","#wBuf"].forEach(s => $(s).addEventListener("change", upd));
+  ["#wStart","#wEnd","#workKw","#wBuf","#lStart","#lEnd"].forEach(s => $(s).addEventListener("change", upd));
 }
 const toMin = s => { const [h,m] = String(s).split(":").map(Number); return (h||0)*60 + (m||0); };
 // "work" = core hours, "edge" = within the commute buffer, "off" = outside
 function zone(d){
   if(!settings.days.includes(d.getDay())) return "off";
   const m = d.getHours()*60 + d.getMinutes(), s = toMin(settings.start), e = toMin(settings.end), b = +settings.buf || 0;
-  if(m >= s && m < e) return "work";
+  if(m >= s && m < e){ const ls = toMin(settings.lunchS || "12:00"), le = toMin(settings.lunchE || "13:00"); return (m >= ls && m < le) ? "lunch" : "work"; }
   if(m >= s - b && m < e + b) return "edge";
   return "off";
 }
@@ -877,6 +932,9 @@ function makeSample(){
       net("com.vivarepublica.toss", "api.toss.im", at(off, 10, 2), 9);
       if(off === 1 || off === 3) net(SF, "www.saramin.co.kr", at(off, 15, 12), 22, "saramin.co.kr");
       if(off === 3) net(SF, "www.wanted.co.kr", at(off, 15, 40), 15, "wanted.co.kr");
+      if(off === 2) net(SF, "www.goodoc.co.kr", at(off, 11, 3), 9, "goodoc.co.kr");
+      if(off % 2 === 1) net("com.supercell.clashroyale", "game.clashroyaleapp.com", at(off, 14, 30), 25);
+      net(YT, "rr2---sn-ab5l6nr6.googlevideo.com", at(off, 12, 20), 80);
       if(off === 1) net("com.linkedin.LinkedIn", "www.linkedin.com", at(off, 16, 5), 18);
       if(off % 3 === 0) net(SF, "www.teamblind.com", at(off, 16, 44), 11, "teamblind.com");
       net("com.burbn.instagram", "scontent-ssn1-1.cdninstagram.com", at(off, 13, 5), 70); net("com.burbn.instagram", "graph.facebook.com", at(off, 13, 6), 8);
@@ -902,30 +960,227 @@ function makeSample(){
 }
 
 /* analyze & render */
-let repAnalysis = null;
+const RISKL = {3:["높음","bad"],2:["중간","warn"],1:["낮음","info"],0:["없음","ok"]};
+const CATINFO = {
+  job:{risk:3, act:"구직 사이트 접속", sees:"사이트 이름(예: saramin.co.kr), 접속한 날짜·시각, 횟수", not:"어떤 공고를 봤는지, 지원했는지, 이력서 내용", mean:"이직을 준비한다는 정황으로 읽힐 수 있어요. 여러 날 반복되면 더 눈에 띄어요.", tip:"구직 사이트는 와이파이를 끄고 셀룰러로만 접속하세요."},
+  "work-com":{risk:3, act:"직장인 커뮤니티 접속", sees:"블라인드 같은 커뮤니티에 접속한 시각과 횟수", not:"어떤 글을 읽거나 썼는지, 닉네임", mean:"회사 관련 글이 올라왔을 때 그 시각에 접속한 사람으로 의심받는 단서가 될 수 있어요.", tip:"커뮤니티는 셀룰러로만 접속하세요. 글을 쓴 시각과 접속 시각이 겹치지 않게 하는 게 안전해요."},
+  health:{risk:3, act:"병원·건강 서비스 접속", sees:"병원·의료 서비스 이름과 시각", not:"진료 과목, 예약·진료 내용", mean:"건강 상태를 짐작하게 만들 수 있어요.", tip:"의료 서비스는 셀룰러로 쓰세요."},
+  date:{risk:3, act:"데이팅 앱 사용", sees:"데이팅 서비스 이름과 사용 시각", not:"대화 상대, 프로필, 메시지 내용", mean:"사생활이 그대로 드러나요.", tip:"셀룰러로만 쓰세요."},
+  fin:{risk:2, act:"금융·투자 앱 사용", sees:"은행·증권·코인 서비스 이름과 사용 시각", not:"잔고, 거래 금액, 계좌 정보", mean:"근무 중에 주식·코인 거래를 했다고 보일 수 있어요. 송금·조회 정도는 흔한 일이에요.", tip:"거래는 점심시간에 셀룰러로 하면 안전해요."},
+  game:{risk:2, act:"게임", sees:"게임 서비스 이름과 접속 시간", not:"게임 내용", mean:"근무 중에 게임을 했다는 게 그대로 남아요.", tip:"근무시간에는 게임 앱을 끄거나 셀룰러로 쓰세요."},
+  video:{risk:1, heavy:2, act:"동영상 시청", sees:"유튜브·넷플릭스 같은 서비스 이름, 시청 시간대, 데이터 사용량", not:"어떤 영상을 봤는지", mean:"데이터를 많이 써서 관리 화면 상위에 잘 보여요. 길게 보면 근무 태만으로 보일 수 있어요.", tip:"동영상은 점심시간에 보거나 셀룰러로 보세요."},
+  sns:{risk:1, heavy:2, act:"SNS 사용", sees:"인스타그램 같은 서비스 이름과 사용 시간대", not:"본 게시물, DM 내용, 계정", mean:"잠깐씩은 흔하지만 길게 쓰면 근무 태만으로 보일 수 있어요.", tip:"길게 볼 때는 셀룰러로 바꾸세요."},
+  shop:{risk:1, act:"쇼핑·배달 앱", sees:"쇼핑몰·배달 앱 이름과 시각", not:"본 상품, 주문 내용, 주소", mean:"일상적인 사용으로 보는 편이에요.", tip:""},
+  msg:{risk:1, act:"메신저 사용", sees:"카카오톡 같은 메신저를 쓴 시각", not:"대화 내용, 대화 상대, 사진", mean:"대부분 쓰는 서비스라 문제 될 일은 드물어요.", tip:""},
+  portal:{risk:1, act:"포털·뉴스", sees:"네이버·구글 같은 사이트 이름", not:"검색어, 읽은 기사", mean:"일상적인 사용이에요.", tip:""},
+  other:{risk:1, act:"기타 서비스", sees:"서비스 주소와 시각", not:"내용", mean:"분류되지 않은 서비스예요. 아래 목록에서 직접 확인해 보세요.", tip:""},
+  work:{risk:0, act:"업무 서비스", sees:"업무 서비스 사용 시각", not:"", mean:"업무 기록이에요.", tip:""},
+  track:{risk:0, act:"광고·분석 통신", sees:"앱이 광고 업체와 통신한 기록", not:"보낸 내용", mean:"앱이 자동으로 보내는 통신이라 회사가 봐도 의미가 거의 없어요.", tip:""},
+  sys:{risk:0, act:"Apple 시스템", sees:"", not:"", mean:"", tip:""}
+};
+const ZL = {work:"근무시간", lunch:"점심시간", edge:"출퇴근 시간대", off:"근무 외"};
+const avgHM = a => { if(!a.length) return "-"; const m = Math.round(a.reduce((x,y) => x+y, 0) / a.length); return pad(Math.floor(m/60)) + ":" + pad(m%60); };
+const mins = d => d.getHours()*60 + d.getMinutes();
+
+function netContext(){
+  const nr = lastNetResult;
+  const lv = nr ? nr.lv : null;
+  const relay = nr ? nr.sig.domainHidden : false;
+  let id = "unknown";
+  if(manual.login === "yes") id = "account";
+  else if(manual.name === "yes" || manual.mac === "off" || manual.mac === "fixed") id = "device";
+  else if(manual.name === "no" && manual.mac === "rotating") id = "anon";
+  return {nr, lv, relay, id, content: lv === 4 || manual.rootca === "yes"};
+}
+
+let repAnalysis = null, storyDay = null;
 function analyzeAndRenderReport(){
   const R = report;
+  const C = netContext();
   const days = [...new Set([...R.acc.map(a => dayKey(a.start)), ...R.net.map(n => dayKey(n.ts))])].sort();
   const loc = R.acc.filter(a => a.cat === "location");
   const locW = loc.filter(a => isWorkApp(a.bundle));
-  const workNet = R.net.filter(n => isWork(n.ts));
   const site = n => (n.bundle === "com.apple.mobilesafari" && n.ctx) ? n.ctx : n.domain;
-  const workNetC = workNet.map(n => ({...n, site:site(n), cat:catOfDomain(site(n))}));
-  const sens = workNetC.filter(n => n.cat.sens >= 2);
+  const hiddenN = n => C.relay && n.bundle === "com.apple.mobilesafari";
+  const onWifi = R.net.filter(n => isWork(n.ts)).map(n => ({...n, site:site(n), cat:catOfDomain(site(n)), z:zone(n.ts), hidden:hiddenN(n)}));
+  const visible = onWifi.filter(n => !n.hidden && n.cat.k !== "sys");
+  const workDays = [...new Set(onWifi.map(n => dayKey(n.ts)))].sort();
+  const nWD = Math.max(1, workDays.length);
 
-  // stats
-  const outLocW = locW.filter(a => !isWork(a.start));
-  const first = days[0], last = days[days.length - 1];
+  // personal usage minutes (core work hours only, 5-minute buckets)
+  const buckets = {};
+  visible.forEach(n => {
+    if(n.z !== "work") return;
+    const info = CATINFO[n.cat.k] || CATINFO.other;
+    if(info.risk === 0 || n.cat.k === "msg" || n.cat.k === "portal" || n.cat.k === "other") return;
+    const s = n.first && (n.ts - n.first) <= 60*60000 ? n.first : n.ts;
+    const set = buckets[n.cat.k] = buckets[n.cat.k] || new Set();
+    for(let t = Math.floor(s.getTime()/300000); t <= Math.floor(n.ts.getTime()/300000) && set.size < 100000; t++) set.add(t);
+  });
+  const usage = Object.fromEntries(Object.entries(buckets).map(([k,s]) => [k, Math.round(s.size * 5 / nWD)]));
+  const effRisk = k => { const i = CATINFO[k] || CATINFO.other; return (i.heavy && (usage[k] || 0) >= 30) ? i.heavy : i.risk; };
+
+  // category groups
+  const groups = {};
+  visible.forEach(n => {
+    const g = groups[n.cat.k] = groups[n.cat.k] || {k:n.cat.k, label:n.cat.label, rows:[], hits:0, days:new Set(), lunch:0, sites:{}};
+    g.rows.push(n); g.hits += n.hits; g.days.add(dayKey(n.ts)); if(n.z === "lunch") g.lunch++;
+    const sk = n.site + "|" + appName(n.bundle);
+    const s = g.sites[sk] = g.sites[sk] || {site:n.site, app:appName(n.bundle), times:[]}; s.times.push(n);
+  });
+  Object.values(groups).forEach(g => {
+    g.risk = effRisk(g.k);
+    if(g.risk >= 2 && g.lunch === g.rows.length) { g.risk -= 1; g.lunchOnly = true; }
+  });
+  const riskGroups = Object.values(groups).filter(g => g.risk >= 1).sort((a,b) => b.risk - a.risk || b.rows.length - a.rows.length);
+  const nHigh = riskGroups.filter(g => g.risk === 3).reduce((x,g) => x + g.rows.length, 0);
+  const nMid = riskGroups.filter(g => g.risk === 2).reduce((x,g) => x + g.rows.length, 0);
+
+  // banner + stats
+  const outLocW = locW.filter(a => zone(a.start) === "off");
+  let bn;
+  if(C.content) bn = ["bad","!","회사가 내용까지 볼 수 있는 구조예요","네트워크 진단에서 루트 인증서·가로채기가 확인됐어요. 아래 기록의 내용(검색어, 메시지)까지 남을 수 있어요."];
+  else if(nHigh) bn = ["bad", String(nHigh), "회사가 알면 곤란할 수 있는 접속이 있어요", "위험도 높음 " + nHigh + "건" + (nMid ? " · 중간 " + nMid + "건" : "") + ". 아래 '위험도별 접속 정리'에서 무엇이 보이는지 확인하세요."];
+  else if(nMid || outLocW.length) bn = ["warn", String(nMid + outLocW.length), "주의해서 볼 기록이 있어요", (nMid ? "위험도 중간 접속 " + nMid + "건" : "") + (nMid && outLocW.length ? " · " : "") + (outLocW.length ? "근무 외 위치 접근 " + outLocW.length + "회" : "")];
+  else bn = ["ok","✓","크게 문제 될 기록은 없어요","회사 와이파이에 남았을 기록은 일상적인 사용 수준이에요."];
+  $("#banner").className = "banner " + bn[0];
+  $("#banner").innerHTML = `<div class="bi">${esc(bn[1])}</div><div><b>${esc(bn[2])}</b><span>${esc(bn[3])}</span></div>`;
+  const persMin = Object.values(usage).reduce((x,y) => x+y, 0);
   const stats = [
-    ["분석 기간", days.length + "일", ""],
+    ["근무시간 접속 서비스", new Set(visible.map(n => n.cat.k === "other" || n.bundle === "com.apple.mobilesafari" ? n.site : appName(n.bundle))).size + "개", ""],
+    ["하루 개인 용도 (추정)", "약 " + persMin + "분", persMin >= 60 ? "alert" : ""],
     ["업무용 앱 위치 접근", locW.length + "회", ""],
-    ["그중 근무시간 외", outLocW.length + "회", outLocW.length ? "alert" : ""],
-    ["근무시간 민감 접속", sens.length + "건", sens.length ? "alert" : ""]
+    ["그중 근무 외", outLocW.length + "회", outLocW.length ? "alert" : ""]
   ];
   $("#stats").innerHTML = stats.map(([k,v,c]) => `<div class="stat ${c}"><div class="v">${esc(v)}</div><div class="k">${esc(k)}</div></div>`).join("");
-  $("#periodNote").textContent = (first ? first + " ~ " + last : "기록 없음") + " · 앱 " + new Set([...R.acc.map(a=>a.bundle), ...R.net.map(n=>n.bundle)]).size + "개 · 통신 기록 " + R.net.length + "건 · 권한 접근 " + R.acc.length + "건" + (R.bad ? " · 읽지 못한 줄 " + R.bad + "개" : "") + (reportIsSample ? " · 샘플 데이터" : "");
+  $("#periodNote").textContent = (days.length ? days[0] + " ~ " + days[days.length-1] : "기록 없음") + " · 근무일 " + workDays.length + "일 · 앱 " + new Set([...R.acc.map(a=>a.bundle), ...R.net.map(n=>n.bundle)]).size + "개 · 통신 " + R.net.length + "건 · 권한 접근 " + R.acc.length + "건" + (R.bad ? " · 읽지 못한 줄 " + R.bad + "개" : "") + (reportIsSample ? " · 샘플 데이터" : "");
 
-  // work app location timeline
+  // ---------- what the company knows ----------
+  const G = {know:[], guess:[], unsure:[], safe:[]};
+  const firstL = [], lastL = [];
+  workDays.forEach(dk => {
+    const t = [...onWifi.filter(n => dayKey(n.ts) === dk).map(n => n.ts), ...locW.filter(a => dayKey(a.start) === dk && isWork(a.start)).map(a => a.start)];
+    if(!t.length) return; firstL.push(Math.min(...t.map(mins))); lastL.push(Math.max(...t.map(mins)));
+  });
+  if(workDays.length) G.know.push(["info","회사에 있던 시간", "첫 기록 평균 " + avgHM(firstL) + ", 마지막 기록 평균 " + avgHM(lastL) + " (" + workDays.length + "일). 출퇴근 시각과 자리를 비운 시간대를 짐작할 수 있어요."]);
+  const chk = locW.filter(a => zone(a.start) === "edge");
+  if(chk.length) G.know.push(["info","출퇴근 체크 때의 위치", appName(chk[0].bundle) + " 근태 기록 " + chk.length + "회. 체크한 순간의 정확한 위치가 회사에 남아요. 출퇴근 체크가 위치 기반이라면 정상적인 기록이에요."]);
+  const topSvc = Object.values(groups).filter(g => g.k !== "track" && g.k !== "work").flatMap(g => Object.values(g.sites)).sort((a,b) => b.times.length - a.times.length);
+  const svcNames = [...new Set(topSvc.map(s => s.app === "Safari" ? s.site : s.app))];
+  if(svcNames.length) G.know.push(["info","근무시간에 쓴 앱·사이트", svcNames.slice(0,6).join(", ") + (svcNames.length > 6 ? " 외 " + (svcNames.length - 6) + "개" : "") + ". 언제 어떤 서비스를 썼는지 시간순으로 남아요."]);
+  if(C.id === "account") G.know.push(["bad","이 기록이 누구 것인지", "사번·계정으로 로그인하는 와이파이라 모든 기록이 내 이름으로 정리돼요."]);
+  if(C.content) G.know.push(["bad","검색어·메시지 같은 내용", "루트 인증서·가로채기 구조라 암호화된 내용까지 볼 수 있어요."]);
+
+  riskGroups.filter(g => g.risk >= 2).forEach(g => {
+    const info = CATINFO[g.k] || CATINFO.other;
+    const names = [...new Set(g.rows.map(n => n.app === "Safari" || n.bundle === "com.apple.mobilesafari" ? n.site : appName(n.bundle)))];
+    G.guess.push([RISKL[g.risk][1], info.act + " → " + (info.mean.split(".")[0]), names.slice(0,3).join(", ") + " · " + g.rows.length + "회, " + g.days.size + "일" + (g.days.size >= 2 ? " (반복)" : "") + (g.lunchOnly ? " · 모두 점심시간" : "")]);
+  });
+  if(persMin){
+    const parts = Object.entries(usage).filter(([,m]) => m > 0).sort((a,b) => b[1]-a[1]).map(([k,m]) => CAT_BY_K[k].label + " " + m + "분");
+    G.guess.push([persMin >= 60 ? "warn" : "info", "근무 중 개인 용도 사용 시간", "하루 평균 약 " + persMin + "분 (" + parts.join(", ") + "). 점심시간은 빼고 계산했어요. 통신 기록으로 계산한 추정치예요."]);
+  }
+  if(C.id === "device") G.guess.push(["warn","이 기록이 누구 것인지", "기기 이름이나 고정된 기기 주소로 내 폰이라는 걸 알 수 있어요."]);
+  if(C.id === "unknown") G.guess.push(["info","이 기록이 누구 것인지", "네트워크 진단의 '직접 확인할 항목'에서 기기 이름·주소·로그인 방식을 답하면 판단해 드려요."]);
+
+  if(outLocW.length) G.unsure.push(["warn", "근무 외 위치 접근 " + outLocW.length + "회", appName(outLocW[0].bundle) + "가 퇴근 후·휴일에 위치를 가져갔어요. 회사 서버로 전송됐다면 관리자 화면에 남을 수 있지만, 리포트로는 확인할 수 없어요. 위치 권한을 '다음번에 묻기'로 바꾸면 막을 수 있어요."]);
+  const midLoc = locW.filter(a => zone(a.start) === "work" || zone(a.start) === "lunch");
+  if(midLoc.length) G.unsure.push(["info", "근무시간 중 위치 접근 " + midLoc.length + "회", "출퇴근 체크가 아닌 시간에 앱이 위치를 확인했어요. 메일·메신저를 열 때 함께 가져간 것으로 보여요. 회사로 전송됐는지는 알 수 없어요."]);
+  const wOther = R.acc.filter(a => a.cat !== "location" && isWorkApp(a.bundle));
+  if(wOther.length){ const cs = [...new Set(wOther.map(a => ACC_LABEL[a.cat] || a.cat))]; G.unsure.push(["info", "업무용 앱의 " + cs.join("·") + " 접근 " + wOther.length + "회", "첨부·주소록 동기화 같은 기능 때문일 수 있어요. 회사로 전송됐는지는 알 수 없어요."]); }
+  const wTrack = R.net.filter(n => isWorkApp(n.bundle) && catOfDomain(n.domain).k === "track");
+  if(wTrack.length) G.unsure.push(["info", "업무용 앱 안의 분석 도구", [...new Set(wTrack.map(n => n.domain))].join(", ") + "로 사용 기록을 보내요. 회사가 아니라 앱 개발사·분석 업체가 받는 데이터예요."]);
+
+  if(!C.content) G.safe.push(["ok","카톡 대화, 검색어, 본 영상·공고·게시물 내용", "모두 암호화돼서 회사 와이파이에서는 보이지 않아요."]);
+  const othAcc = R.acc.filter(a => !isWorkApp(a.bundle));
+  if(othAcc.length) G.safe.push(["ok","다른 앱의 위치·카메라·사진 접근 " + othAcc.length + "건", "폰 안에서 일어난 일이라 회사 네트워크에 남지 않아요."]);
+  const offNet = R.net.filter(n => !isWork(n.ts)).length;
+  if(offNet) G.safe.push(["ok","퇴근 후·휴일 사용 " + offNet + "건", "회사 와이파이 밖에서 썼다면 회사에 남지 않아요."]);
+  if(C.relay) G.safe.push(["ok","Safari로 방문한 사이트", "비공개 릴레이가 켜져 있어서 사이트 이름까지 가려져요."]);
+  if(C.id === "anon") G.safe.push(["ok","이 기록이 누구 것인지", "기기 이름에 실명이 없고 주소가 바뀌어서 기기만으로는 알기 어려워요. 다만 출근 시간·자리 같은 정보와 맞춰 보면 추정할 수 있어요."]);
+
+  const PLk = {ok:"안전",warn:"주의",bad:"위험",info:"참고"};
+  const grp = (cls, title, sub, arr) => arr.length ? `<div class="kgroup ${cls}"><div class="kh">${esc(title)} <small>${esc(sub)}</small></div><ul class="items" style="margin-top:4px">${arr.map(([s,t,d]) => `<li><span class="pill ${s}">${PLk[s]}</span><div><b>${esc(t)}</b><span class="s">${esc(d)}</span></div></li>`).join("")}</ul></div>` : "";
+  $("#knowBasis").innerHTML = (C.nr ? "네트워크 진단(노출 " + C.lv + "단계)과 리포트를 함께 반영했어요." : "<b>네트워크 진단을 먼저 하면</b> 내용 열람·릴레이·누구인지까지 반영돼서 더 정확해져요.") + " 리포트에는 와이파이·셀룰러 구분이 없어서 <b>근무시간 = 회사 와이파이 사용</b>으로 가정했어요.";
+  $("#know").innerHTML =
+    grp("g1","회사가 확실히 알 수 있어요","회사 장비에 그대로 남는 기록", G.know) +
+    grp("g2","회사가 추정할 수 있어요","기록을 모아 보면 드러나는 것", G.guess) +
+    grp("g3","확인이 어려워요","리포트만으로는 알 수 없는 것", G.unsure) +
+    grp("g4","회사는 몰라요","네트워크에 남지 않는 것", G.safe);
+
+  // ---------- risk cards ----------
+  if(!riskGroups.length){ $("#riskCards").innerHTML = `<p class="note">근무시간 접속 기록이 없어요. 근무 요일·시간 설정을 확인해 보세요.</p>`; }
+  else $("#riskCards").innerHTML = riskGroups.map(g => {
+    const info = CATINFO[g.k] || CATINFO.other;
+    const [rl, rc] = RISKL[g.risk];
+    const sites = Object.values(g.sites).sort((a,b) => b.times.length - a.times.length);
+    const um = usage[g.k] ? " · 하루 약 " + usage[g.k] + "분" : "";
+    return `<details class="rcard"${g.risk >= 2 ? " open" : ""}><summary><span class="pill ${rc}">${rl}</span><div><b>${esc(g.label)}</b><span class="s">${g.rows.length}회 · ${g.days.size}일${esc(um)}${g.lunch ? " · 점심시간 " + g.lunch + "회" : ""}${g.lunchOnly ? " (모두 점심이라 한 단계 낮춤)" : ""}${info.heavy && g.risk === info.heavy ? " (사용 시간이 길어 한 단계 높임)" : ""}</span></div></summary>
+      <div class="ex">
+        <div><span class="lb">회사가 아는 것</span><span>${esc(info.sees)}</span></div>
+        ${info.not ? `<div><span class="lb">회사가 모르는 것</span><span>${C.content ? "<b style='color:var(--bad)'>내용까지 볼 수 있는 구조라 이 부분도 보일 수 있어요</b>" : esc(info.not)}</span></div>` : ""}
+        <div><span class="lb">이렇게 보일 수 있어요</span><span>${esc(info.mean)}</span></div>
+      </div>
+      <div class="sites">${sites.slice(0,6).map(s => `<div><span><span class="dom">${esc(s.site)}</span> <span style="color:var(--muted);font-size:12px">${esc(s.app)}</span></span><span class="tms">${s.times.length}회<br>${esc(s.times.slice(-3).map(n => fmtDT(n.ts) + (n.z === "lunch" ? " 점심" : "")).join(", "))}</span></div>`).join("")}${sites.length > 6 ? `<div class="note">외 ${sites.length - 6}곳</div>` : ""}</div>
+      ${info.tip && g.risk >= 2 ? `<div class="tipb">${esc(info.tip)}</div>` : ""}
+    </details>`;
+  }).join("");
+
+  // ---------- day story ----------
+  const dayRisk = dk => Math.max(0, ...visible.filter(n => dayKey(n.ts) === dk).map(n => effRisk(n.cat.k)));
+  if(!storyDay || !workDays.includes(storyDay)) storyDay = [...workDays].reverse().find(dk => dayRisk(dk) >= 3) || workDays[workDays.length - 1] || null;
+  $("#dayChips").innerHTML = workDays.map(dk => { const [y,m,d] = dk.split("-").map(Number); const dt = new Date(y, m-1, d); const r = dayRisk(dk); return `<button data-d="${dk}" class="${dk === storyDay ? "on" : ""}">${esc(fmtD(dt))}${r >= 3 ? "<i>!</i>" : ""}</button>`; }).join("");
+  $("#dayChips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { storyDay = b.dataset.d; analyzeAndRenderReport(); }));
+  renderStory(storyDay, onWifi, locW, effRisk);
+
+  repAnalysis = {days, loc, locW};
+  renderLocation(loc, locW, outLocW);
+  renderHeat();
+  renderDetails(R, onWifi);
+  $("#repOut").classList.remove("hidden");
+}
+
+function renderStory(dk, onWifi, locW, effRisk){
+  if(!dk){ $("#story").innerHTML = `<li><span class="tx note">근무일 기록이 없어요.</span></li>`; return; }
+  const ev = [];
+  onWifi.filter(n => dayKey(n.ts) === dk && n.cat.k !== "sys" && n.cat.k !== "track").forEach(n => ev.push({t:n.ts, kind:"net", n}));
+  locW.filter(a => dayKey(a.start) === dk && isWork(a.start)).forEach(a => ev.push({t:a.start, kind:"loc", a}));
+  ev.sort((a,b) => a.t - b.t);
+  // merge consecutive same app+category within 20 min
+  const lines = [];
+  ev.forEach(e => {
+    const key = e.kind === "loc" ? "loc" : (e.n.hidden ? "hidden" : appName(e.n.bundle) + "|" + e.n.cat.k + "|" + (e.n.bundle === "com.apple.mobilesafari" ? e.n.site : ""));
+    const last = lines[lines.length - 1];
+    if(last && last.key === key && e.t - last.end <= 20*60000){ last.end = e.t; last.cnt++; return; }
+    lines.push({key, start:e.t, end:e.t, cnt:1, e});
+  });
+  const out = [];
+  if(lines.length) out.push(`<li class="mk"><span class="tm">${esc(fmtT(lines[0].start))}</span><span class="tx"><b>첫 기록</b><small>출근 시각으로 추정돼요</small></span></li>`);
+  lines.slice(0, 60).forEach(L => {
+    const e = L.e; const tm = fmtT(L.start) + (L.end - L.start >= 60000 ? "–" + fmtT(L.end) : "");
+    let cls = "", tx = "", sub = "", pill = "";
+    const z = zone(L.start);
+    if(e.kind === "loc"){
+      cls = "mk"; tx = appName(e.a.bundle) + "가 위치 확인";
+      sub = z === "edge" ? "출퇴근 체크로 보여요 · 회사가 알아요" : "앱을 열 때 가져간 것으로 보여요 · 전송 여부는 알 수 없어요";
+    } else if(e.n.hidden){
+      tx = "Safari 사이트 방문"; sub = "비공개 릴레이로 사이트 이름이 가려져요";
+    } else {
+      const info = CATINFO[e.n.cat.k] || CATINFO.other; const r = effRisk(e.n.cat.k);
+      cls = r >= 2 ? "r" + r : "";
+      tx = (e.n.bundle === "com.apple.mobilesafari" ? e.n.site : appName(e.n.bundle)) + " · " + info.act;
+      sub = (r >= 2 ? info.mean.split(".")[0] + "." : "회사는 사용 시각만 알아요.");
+      if(r >= 2) pill = `<span class="pill ${RISKL[r][1]}">${RISKL[r][0]}</span>`;
+    }
+    if(z === "lunch") sub += " · 점심시간";
+    out.push(`<li class="${cls}"><span class="tm">${esc(tm)}</span><span class="tx">${esc(tx)} ${pill}<small>${esc(sub)}</small></span></li>`);
+  });
+  if(lines.length > 60) out.push(`<li><span class="tm"></span><span class="tx note">외 ${lines.length - 60}개 기록</span></li>`);
+  if(lines.length) out.push(`<li class="mk"><span class="tm">${esc(fmtT(lines[lines.length-1].end))}</span><span class="tx"><b>마지막 기록</b><small>퇴근 시각으로 추정돼요</small></span></li>`);
+  $("#story").innerHTML = out.join("") || `<li><span class="tx note">이 날 근무시간 기록이 없어요.</span></li>`;
+}
+
+function renderLocation(loc, locW, outLocW){
   if(!locW.length){
     $("#locWork").innerHTML = `<p class="note" style="margin:0">'${esc(settings.kw)}'에 해당하는 업무용 앱의 위치 접근 기록이 없어요. 업무용 앱 찾을 단어를 확인해 보세요. 아래 '앱별 위치 접근' 표에서 앱 ID를 확인할 수 있어요.</p>`;
   } else {
@@ -936,69 +1191,51 @@ function analyzeAndRenderReport(){
     let verdict;
     if(!outLocW.length) verdict = {sev:"ok", t:"근무시간 안에서만 위치에 접근했어요", s:(edge ? "출퇴근 시간대 " + edge + "회는 출근·퇴근 체크로 보여요. " : "") + "그 밖의 시간에는 접근 기록이 없어요."};
     else verdict = {sev:"warn", t:"근무시간 밖에서 " + outLocW.length + "회 접근했어요", s:[edge ? "출퇴근 시간대 " + edge + "회는 체크로 보여 제외" : "", lateEve.length ? "밤 시간대 " + lateEve.length + "회" : "", weekend.length ? "휴일 " + weekend.length + "회" : ""].filter(Boolean).join(" · ") + ". '앱을 사용하는 동안' 권한이라 그 시간에 앱을 열었을 가능성이 커요. 열지 않았는데 기록이 있다면 확인이 필요해요."};
+    const zp = z => z === "off" ? "warn" : z === "edge" ? "ok" : "info";
     $("#locWork").innerHTML = `
       <ul class="items" style="margin-top:0"><li><span class="pill ${verdict.sev}">${verdict.sev === "ok" ? "정상" : "확인"}</span><div><b>${esc(names)}: ${esc(verdict.t)}</b><span class="s">${esc(verdict.s)}</span></div></li></ul>
       <ul class="tl">${locW.slice().reverse().map(a => {
         const z = zone(a.start); const dur = Math.max(1, Math.round((a.end - a.start)/1000));
-        return `<li><span class="tm">${esc(fmtDT(a.start))}</span><span class="pill ${z === "off" ? "warn" : z === "edge" ? "ok" : "info"}">${z === "off" ? "근무 외" : z === "edge" ? "출퇴근 시간대" : "근무시간"}</span><span style="color:var(--muted);font-size:12px">${dur < 60 ? dur + "초" : Math.round(dur/60) + "분"}</span></li>`;
+        return `<li><span class="tm">${esc(fmtDT(a.start))}</span><span class="pill ${zp(z)}">${ZL[z]}</span><span style="color:var(--muted);font-size:12px">${dur < 60 ? dur + "초" : Math.round(dur/60) + "분"}</span></li>`;
       }).join("")}</ul>`;
   }
-
-  repAnalysis = {days, loc, locW, workNetC, sens};
-  renderHeat();
-
-  // per-app location table
   const byApp = {};
-  loc.forEach(a => { const o = byApp[a.bundle] = byApp[a.bundle] || {n:0, w:0, o:0, last:null}; o.n++; isWork(a.start) ? o.w++ : o.o++; if(!o.last || a.start > o.last) o.last = a.start; });
-  const rows = Object.entries(byApp).sort((a,b) => b[1].n - a[1].n);
-  $("#locTable").innerHTML = rows.length ? `<tr><th>앱</th><th class="n">전체</th><th class="n">근무 외</th><th class="n">마지막</th></tr>` + rows.map(([b,o]) => `<tr><td>${esc(appName(b))}${isWorkApp(b) ? ' <span class="pill info">업무</span>' : ""}<div class="dom" style="color:var(--muted);font-size:11px">${esc(b)}</div></td><td class="n">${o.n}</td><td class="n">${o.o}</td><td class="n">${esc(fmtDT(o.last))}</td></tr>`).join("") : `<tr><td class="note">위치 접근 기록이 없어요.</td></tr>`;
+  loc.forEach(a => { const o = byApp[a.bundle] = byApp[a.bundle] || {n:0, o:0, last:null}; o.n++; if(zone(a.start) === "off") o.o++; if(!o.last || a.start > o.last) o.last = a.start; });
+  const rows = Object.entries(byApp).sort((a,b) => (isWorkApp(b[0]) - isWorkApp(a[0])) || b[1].n - a[1].n);
+  $("#locTable").innerHTML = rows.length ? `<tr><th>앱</th><th class="n">전체</th><th class="n">근무 외</th><th class="n">회사가</th></tr>` + rows.map(([b,o]) => `<tr><td>${esc(appName(b))}${isWorkApp(b) ? ' <span class="pill info">업무</span>' : ""}<div class="dom" style="color:var(--muted);font-size:11px">${esc(b)}</div></td><td class="n">${o.n}</td><td class="n">${o.o}</td><td class="n">${isWorkApp(b) ? '<span class="pill warn">일부 앎</span>' : '<span class="pill ok">모름</span>'}</td></tr>`).join("") : `<tr><td class="note">위치 접근 기록이 없어요.</td></tr>`;
+}
 
-  // category bars (work hours, by hits, exclude sys)
+function renderDetails(R, onWifi){
   const catAgg = {};
-  workNetC.forEach(n => { if(n.cat.k === "sys") return; const c = catAgg[n.cat.k] = catAgg[n.cat.k] || {cat:n.cat, hits:0, n:0}; c.hits += n.hits; c.n++; });
+  onWifi.forEach(n => { if(n.cat.k === "sys") return; const c = catAgg[n.cat.k] = catAgg[n.cat.k] || {cat:n.cat, hits:0, n:0}; c.hits += n.hits; c.n++; });
   const cats = Object.values(catAgg).sort((a,b) => b.hits - a.hits);
   const max = Math.max(1, ...cats.map(c => c.hits));
-  $("#catBars").innerHTML = cats.length ? cats.map(c => `<div class="hb" title="${esc(c.cat.label)}: 요청 ${c.hits}회, 기록 ${c.n}건"><span>${esc(c.cat.label)}${c.cat.sens >= 2 ? ' <span class="pill warn" style="font-size:10px;padding:1px 5px">민감</span>' : ""}</span><span class="tr"><i class="${c.cat.sens >= 2 ? "s" : ""}" style="width:${(c.hits/max*100).toFixed(1)}%"></i></span><span class="n">${c.hits}</span></div>`).join("") + `<p class="note">숫자는 근무시간 중 요청 횟수예요. 'Apple 시스템' 통신은 제외했어요.</p>` : `<p class="note">근무시간 중 통신 기록이 없어요. 근무 요일·시간 설정을 확인해 보세요.</p>`;
+  $("#catBars").innerHTML = cats.length ? cats.map(c => `<div class="hb" title="${esc(c.cat.label)}: 요청 ${c.hits}회, 기록 ${c.n}건"><span>${esc(c.cat.label)}</span><span class="tr"><i class="${c.cat.sens >= 2 ? "s" : ""}" style="width:${(c.hits/max*100).toFixed(1)}%"></i></span><span class="n">${c.hits}</span></div>`).join("") + `<p class="note">근무시간 중 요청 횟수예요. 주황 막대는 민감 분류예요. 'Apple 시스템' 통신은 제외했어요.</p>` : `<p class="note">근무시간 중 통신 기록이 없어요.</p>`;
 
-  // sensitive list
-  if(!sens.length){ $("#sensList").innerHTML = `<p class="note" style="margin:0">근무시간 중 구직·직장 커뮤니티·건강·데이팅·금융 사이트 접속이 없어요.</p>`; }
-  else {
-    const g = {};
-    sens.forEach(n => { const key = n.cat.k + "|" + n.site; const o = g[key] = g[key] || {cat:n.cat, site:n.site, apps:new Set(), times:[]}; o.apps.add(appName(n.bundle)); o.times.push(n.ts); });
-    const list = Object.values(g).sort((a,b) => b.cat.sens - a.cat.sens || b.times.length - a.times.length);
-    $("#sensList").innerHTML = `<ul class="items" style="margin-top:0">` + list.map(o => `<li><span class="pill ${o.cat.sens >= 3 ? "bad" : "warn"}">${esc(o.cat.label)}</span><div><b class="dom">${esc(o.site)}</b><span class="s">${esc([...o.apps].join(", "))} · ${o.times.length}회 · ${esc(o.times.slice(0,4).map(fmtDT).join(", "))}${o.times.length > 4 ? " 외" : ""}</span></div></li>`).join("") + `</ul><p class="note">회사 장비에는 이 사이트 이름과 시각이 남을 수 있어요. 페이지 내용(공고 제목, 글 내용)은 루트 인증서가 없으면 남지 않아요.</p>`;
-  }
-
-  // work app network
   const wn = R.net.filter(n => isWorkApp(n.bundle));
   if(!wn.length){ $("#workNet").innerHTML = `<p class="note" style="margin:0">업무용 앱의 통신 기록이 없어요.</p>`; }
   else {
     const g = {};
-    wn.forEach(n => { const o = g[n.domain] = g[n.domain] || {hits:0, n:0, out:0, cat:catOfDomain(n.domain)}; o.hits += n.hits; o.n++; if(!isWork(n.ts)) o.out++; });
+    wn.forEach(n => { const o = g[n.domain] = g[n.domain] || {hits:0, out:0, cat:catOfDomain(n.domain)}; o.hits += n.hits; if(!isWork(n.ts)) o.out++; });
     const list = Object.entries(g).sort((a,b) => b[1].hits - a[1].hits);
-    const thirdParty = list.filter(([,o]) => o.cat.k !== "work" && o.cat.k !== "sys");
-    $("#workNet").innerHTML = `<table class="t"><tr><th>도메인</th><th class="n">요청</th><th class="n">근무 외</th></tr>` + list.map(([d,o]) => `<tr><td><span class="dom">${esc(d)}</span> <span class="pill ${o.cat.k === "track" ? "warn" : "info"}" style="font-size:10px">${esc(o.cat.label)}</span></td><td class="n">${o.hits}</td><td class="n">${o.out}</td></tr>`).join("") + `</table>` +
-      `<p class="note">${thirdParty.length ? "업무용 앱이 회사 서버 외에 " + thirdParty.map(([d]) => d).join(", ") + "에도 데이터를 보내요. 광고·분석 SDK가 들어 있다는 뜻이에요." : "업무용 앱은 자체 서버와만 통신했어요."} 위치 좌표가 실제로 어느 서버로 갔는지는 리포트로 알 수 없어요.</p>`;
+    const third = list.filter(([,o]) => o.cat.k !== "work" && o.cat.k !== "sys");
+    $("#workNet").innerHTML = `<table class="t"><tr><th>도메인</th><th class="n">요청</th><th class="n">근무 외</th></tr>` + list.map(([d,o]) => `<tr><td><span class="dom">${esc(d)}</span> <span class="pill ${o.cat.k === "track" ? "warn" : "info"}" style="font-size:10px">${esc(o.cat.label)}</span></td><td class="n">${o.hits}</td><td class="n">${o.out}</td></tr>`).join("") + `</table><p class="note">${third.length ? "업무용 앱이 회사 서버 외에 " + third.map(([d]) => d).join(", ") + "에도 데이터를 보내요. 광고·분석 SDK가 들어 있다는 뜻이에요." : "업무용 앱은 자체 서버와만 통신했어요."} 위치 좌표가 실제로 어느 서버로 갔는지는 리포트로 알 수 없어요.</p>`;
   }
 
-  // other access
   const oth = R.acc.filter(a => a.cat !== "location");
   if(!oth.length){ $("#otherAcc").innerHTML = `<p class="note" style="margin:0">위치 외 권한 접근 기록이 없어요.</p>`; }
   else {
     const g = {};
     oth.forEach(a => { const k = a.bundle + "|" + a.cat; const o = g[k] = g[k] || {b:a.bundle, c:a.cat, n:0, last:a.start}; o.n++; if(a.start > o.last) o.last = a.start; });
     const list = Object.values(g).sort((a,b) => (isWorkApp(b.b) - isWorkApp(a.b)) || b.n - a.n);
-    $("#otherAcc").innerHTML = `<table class="t"><tr><th>앱</th><th>권한</th><th class="n">횟수</th><th class="n">마지막</th></tr>` + list.map(o => `<tr><td>${esc(appName(o.b))}${isWorkApp(o.b) ? ' <span class="pill warn">업무</span>' : ""}</td><td style="white-space:nowrap">${esc(ACC_LABEL[o.c] || o.c)}</td><td class="n">${o.n}</td><td class="n">${esc(fmtDT(o.last))}</td></tr>`).join("") + `</table>` + (list.some(o => isWorkApp(o.b)) ? `<p class="note">업무용 앱이 위치 외 권한에도 접근했어요. 필요한 기능(첨부 사진, 연락처 동기화 등)인지 확인해 보세요.</p>` : "");
+    $("#otherAcc").innerHTML = `<table class="t"><tr><th>앱</th><th>권한</th><th class="n">횟수</th><th class="n">마지막</th></tr>` + list.map(o => `<tr><td>${esc(appName(o.b))}${isWorkApp(o.b) ? ' <span class="pill warn">업무</span>' : ""}</td><td style="white-space:nowrap">${esc(ACC_LABEL[o.c] || o.c)}</td><td class="n">${o.n}</td><td class="n">${esc(fmtDT(o.last))}</td></tr>`).join("") + `</table><p class="note">폰 안의 권한 접근이라 회사 네트워크에는 남지 않아요.</p>`;
   }
 
-  // trackers
   const tr = {};
   R.net.forEach(n => { if(catOfDomain(n.domain).k !== "track") return; const o = tr[n.bundle] = tr[n.bundle] || {hits:0, doms:new Set()}; o.hits += n.hits; o.doms.add(n.domain); });
   const tl = Object.entries(tr).sort((a,b) => b[1].hits - a[1].hits).slice(0, 6);
   const tmax = Math.max(1, ...tl.map(([,o]) => o.hits));
-  $("#trackers").innerHTML = tl.length ? tl.map(([b,o]) => `<div class="hb" style="grid-template-columns:110px 1fr 44px" title="${esc([...o.doms].join(", "))}"><span>${esc(appName(b))}</span><span class="tr"><i style="width:${(o.hits/tmax*100).toFixed(1)}%"></i></span><span class="n">${o.hits}</span></div>`).join("") + `<p class="note">광고·분석 업체로 보낸 요청 수예요. 막대를 길게 누르면 도메인이 보여요. 회사가 아니라 각 앱 개발사가 수집하는 정보예요.</p>` : `<p class="note" style="margin:0">알려진 광고·추적 서버와의 통신이 없어요.</p>`;
-
-  $("#repOut").classList.remove("hidden");
+  $("#trackers").innerHTML = tl.length ? tl.map(([b,o]) => `<div class="hb" style="grid-template-columns:110px 1fr 44px" title="${esc([...o.doms].join(", "))}"><span>${esc(appName(b))}</span><span class="tr"><i style="width:${(o.hits/tmax*100).toFixed(1)}%"></i></span><span class="n">${o.hits}</span></div>`).join("") + `<p class="note">광고·분석 업체로 보낸 요청 수예요. 회사가 아니라 각 앱 개발사가 수집하는 정보예요.</p>` : `<p class="note" style="margin:0">알려진 광고·추적 서버와의 통신이 없어요.</p>`;
 }
 
 function renderHeat(){
