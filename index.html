@@ -668,14 +668,46 @@ foreach ($r in $roots) {
 $R.browsers = $br
 
 # ---------- save ----------
+# Windows PowerShell 5.1 cannot turn very large text into JSON in one go,
+# so the small part is converted normally and the browser history is written piece by piece.
+Step 'Saving result file'
+$ErrorActionPreference = 'Continue'
 $desk = [Environment]::GetFolderPath('Desktop')
-if (-not $desk) { $desk = $env:USERPROFILE }
+if (-not $desk -or -not (Test-Path $desk)) { $desk = $env:USERPROFILE }
 $out = Join-Path $desk ('PrivacyGuard_result_' + (Get-Date -Format 'yyyyMMdd_HHmm') + '.json')
-$json = $R | ConvertTo-Json -Depth 6 -Compress
-[System.IO.File]::WriteAllText($out, $json, (New-Object System.Text.UTF8Encoding($false)))
+$brs = @($R.browsers)
+$R.Remove('browsers')
+$meta = $null
+try { $meta = $R | ConvertTo-Json -Depth 6 -Compress -ErrorAction Stop } catch { Write-Host ('[PrivacyGuard] JSON error: ' + $_.Exception.Message) -ForegroundColor Red }
+if (-not $meta) { $meta = '{"tool":"PrivacyGuard-Windows","version":1,"error":"summary could not be converted"}' }
+$meta = "$meta".Trim()
+try {
+  $w = New-Object System.IO.StreamWriter($out, $false, (New-Object System.Text.UTF8Encoding($false)))
+  $w.Write($meta.Substring(0, $meta.Length - 1))
+  $w.Write(',"browsers":[')
+  $first = $true
+  foreach ($b in $brs) {
+    if (-not $first) { $w.Write(',') }
+    $first = $false
+    $w.Write('{"name":"' + $b.name + '","profile":"' + ("$($b.profile)" -replace '["\\]', '') + '","size":' + [int64]$b.size)
+    if ($b.db) { $w.Write(',"db":"'); $w.Write($b.db); $w.Write('"') }
+    if ($b.error) { $w.Write(',"error":"' + $b.error + '"') }
+    $w.Write('}')
+  }
+  $w.Write(']}')
+  $w.Close()
+} catch {
+  Write-Host ('[PrivacyGuard] Could not save the file: ' + $_.Exception.Message) -ForegroundColor Red
+  return
+}
+$size = (Get-Item $out).Length
 Write-Host ''
-Write-Host ('[PrivacyGuard] Done. Saved: ' + $out) -ForegroundColor Green
-Write-Host '[PrivacyGuard] Open the PRIVACY GUARD page > Windows > select this file.' -ForegroundColor Green
+if ($size -lt 1024) {
+  Write-Host ('[PrivacyGuard] Saved, but the file is too small (' + $size + ' bytes). Please send a screenshot of this window.') -ForegroundColor Yellow
+} else {
+  Write-Host ('[PrivacyGuard] Done. Saved: ' + $out + ' (' + [math]::Round($size / 1048576, 1) + ' MB)') -ForegroundColor Green
+  Write-Host '[PrivacyGuard] Open the PRIVACY GUARD page > Windows > select this file.' -ForegroundColor Green
+}
 </script>
 <script>
 (function(){
@@ -1240,6 +1272,7 @@ async function handleFile(file){
     if(file.size > 400 * 1024 * 1024) throw new Error("파일이 너무 커요 (" + mb + "MB). 400MB 이하만 열 수 있어요.");
     const text = await readFile(file);
     const t = text.replace(/^\uFEFF/,"").trim();
+    if(!t){ stage = "파일 확인"; throw new Error("결과 파일이 비어 있어요 (0바이트). 이전 버전 스크립트가 저장 단계에서 실패한 경우예요. 페이지에서 스크립트를 새로 복사(또는 .ps1을 새로 받아) 다시 실행해 주세요."); }
     let j = null;
     if(t.startsWith("{")){ stage = "JSON 해석"; busy.step("파일 구조 확인 중…"); await tick(); j = JSON.parse(t); }
     if(j && (j.tool === "PrivacyGuard-Windows" || j.events || j.computer)){
